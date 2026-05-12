@@ -1,0 +1,20 @@
+{
+  "appId": "com.discordlite.app",
+  "appName": "Discord Lite",
+  "webDir": "build",
+  "server": {
+    "url": "https://web-production-cafaa.up.railway.app",
+    "cleartext": true,
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": true
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 2000,
+      "backgroundColor": "#1e1f22",
+      "showSpinner": false
+    }
+  }
+}

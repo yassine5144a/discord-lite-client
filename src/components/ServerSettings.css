@@ -1,0 +1,23 @@
+.server-settings-modal {
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  width: 100%;
+  max-width: 440px;
+  margin: 16px;
+  overflow: hidden;
+}
+
+/* Reuse profile styles */
+.server-settings-modal .profile-header,
+.server-settings-modal .avatar-section,
+.server-settings-modal .profile-form,
+.server-settings-modal .form-group,
+.server-settings-modal .profile-avatar,
+.server-settings-modal .avatar-overlay,
+.server-settings-modal .avatar-upload,
+.server-settings-modal .profile-username,
+.server-settings-modal .profile-email,
+.server-settings-modal .close-btn,
+.server-settings-modal .btn-primary {
+  /* inherited from UserProfile.css */
+}

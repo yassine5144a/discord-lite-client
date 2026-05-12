@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Discord Lite</string>
+    <string name="title_activity_main">Discord Lite</string>
+    <string name="package_name">com.discordlite.app</string>
+    <string name="custom_url_scheme">com.discordlite.app</string>
+</resources>
