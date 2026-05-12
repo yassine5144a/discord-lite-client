@@ -2,15 +2,10 @@
   "appId": "com.discordlite.app",
   "appName": "Discord Lite",
   "webDir": "build",
-  "server": {
-    "url": "https://discord-lite-client.vercel.app",
-    "cleartext": true,
-    "androidScheme": "https"
-  },
   "android": {
     "allowMixedContent": true,
     "captureInput": true,
-    "webContentsDebuggingEnabled": true
+    "webContentsDebuggingEnabled": false
   },
   "plugins": {
     "SplashScreen": {

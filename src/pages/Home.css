@@ -21,8 +21,8 @@
 
 .mobile-only { display: none; }
 
-/* ── Mobile (≤ 768px) ── */
-@media (max-width: 768px) {
+/* ── Mobile (≤ 900px) - wider breakpoint for WebView ── */
+@media (max-width: 900px) {
   .desktop-only { display: none; }
 
   .mobile-only {
@@ -33,7 +33,6 @@
     overflow: hidden;
   }
 
-  /* Each panel takes full screen minus nav bar */
   .mobile-panel {
     display: none;
     flex: 1;
@@ -45,13 +44,11 @@
     display: flex;
   }
 
-  /* Bottom nav */
   .mobile-nav {
     display: flex;
-    background: var(--bg-primary);
-    border-top: 1px solid var(--border);
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-subtle);
     flex-shrink: 0;
-    /* Safe area for iPhone notch */
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
@@ -76,12 +73,6 @@
     line-height: 1;
   }
 
-  .mobile-nav-btn.active {
-    color: var(--accent);
-  }
-
-  .mobile-nav-btn:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-  }
+  .mobile-nav-btn.active { color: var(--accent); }
+  .mobile-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 }
