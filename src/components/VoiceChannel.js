@@ -3,6 +3,21 @@ import { useSocket } from '../context/SocketContext';
 import { useAuth } from '../context/AuthContext';
 import './VoiceChannel.css';
 
+// Start/stop Android foreground service to keep call alive in background
+const startVoiceService = async () => {
+  try {
+    const { Plugins } = await import('@capacitor/core');
+    if (Plugins.VoiceService) await Plugins.VoiceService.startService();
+  } catch (e) { /* Not on Android */ }
+};
+
+const stopVoiceService = async () => {
+  try {
+    const { Plugins } = await import('@capacitor/core');
+    if (Plugins.VoiceService) await Plugins.VoiceService.stopService();
+  } catch (e) { /* Not on Android */ }
+};
+
 const RTC_CONFIG = {
   iceServers: [
     { urls: 'stun:stun.l.google.com:19302' },
@@ -123,6 +138,8 @@ export default function VoiceChannel({ server, channel }) {
       startVAD('self', stream);
       setInCall(true);
       socket.emit('voice:join', { serverId: server._id, channelId: channel._id });
+      // Start foreground service on Android
+      await startVoiceService();
     } catch (err) {
       alert('Microphone access denied: ' + err.message);
     }
@@ -142,6 +159,8 @@ export default function VoiceChannel({ server, channel }) {
     setPeers([]);
     setScreenSharing(false);
     setSpeaking({});
+    // Stop foreground service on Android
+    stopVoiceService();
   }, [socket, stopVAD]);
 
   const toggleScreenShare = async () => {

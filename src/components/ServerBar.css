@@ -1,35 +1,61 @@
 .server-bar {
   width: var(--server-bar-width);
   background: var(--bg-primary);
+  border-right: 1px solid var(--border-subtle);
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 12px 0;
-  gap: 8px;
+  gap: 6px;
   overflow-y: auto;
+  overflow-x: hidden;
   flex-shrink: 0;
 }
 
+.server-icon-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.server-active-indicator {
+  position: absolute;
+  left: -12px;
+  width: 4px;
+  height: 36px;
+  background: var(--text-primary);
+  border-radius: 0 4px 4px 0;
+}
+
 .server-icon {
-  width: 48px;
-  height: 48px;
+  width: 46px;
+  height: 46px;
   border-radius: 50%;
   background: var(--bg-secondary);
-  color: var(--text-primary);
-  font-size: 16px;
+  color: var(--text-secondary);
+  font-size: 15px;
   font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: border-radius 0.15s, background 0.15s;
+  transition: border-radius 0.2s cubic-bezier(0.4, 0, 0.2, 1), background 0.15s, color 0.15s, transform 0.15s;
   position: relative;
   flex-shrink: 0;
+  border: 2px solid transparent;
 }
 
-.server-icon:hover,
-.server-icon.active {
-  border-radius: 16px;
+.server-icon:hover {
+  border-radius: 14px;
   background: var(--accent);
+  color: white;
+  transform: scale(1.05);
+}
+
+.server-icon.active {
+  border-radius: 14px;
+  background: var(--accent);
+  color: white;
+  box-shadow: 0 0 16px var(--accent-glow);
 }
 
 .server-icon img {
@@ -39,86 +65,22 @@
   object-fit: cover;
 }
 
-.home-icon { font-size: 22px; }
-.add-icon { font-size: 24px; color: var(--success); }
-.add-icon:hover { background: var(--success); color: white; }
-.join-icon { font-size: 18px; }
+.dm-icon { font-size: 20px; }
+.add-icon { color: var(--success); }
+.add-icon:hover { background: var(--success) !important; color: white !important; }
+.join-icon:hover { background: var(--accent) !important; color: white !important; }
+.theme-icon { font-size: 18px; }
 
 .server-divider {
-  width: 32px;
-  height: 2px;
+  width: 28px;
+  height: 1px;
   background: var(--border);
   border-radius: 1px;
   flex-shrink: 0;
+  margin: 2px 0;
 }
 
-/* Modal */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.modal {
-  background: var(--bg-secondary);
-  border-radius: 8px;
-  padding: 24px;
-  width: 100%;
-  max-width: 440px;
-  margin: 16px;
-}
-
-.modal h2 {
-  font-size: 20px;
-  font-weight: 700;
-  margin-bottom: 16px;
-}
-
-.modal input {
-  width: 100%;
-  padding: 10px 12px;
-  background: var(--bg-primary);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  color: var(--text-primary);
-  font-size: 16px;
-  margin-bottom: 16px;
-}
-
-.modal input:focus { border-color: var(--accent); }
-
-.modal-actions {
-  display: flex;
-  gap: 8px;
-  justify-content: flex-end;
-}
-
-.btn-secondary {
-  padding: 10px 16px;
-  background: transparent;
-  color: var(--text-secondary);
-  border-radius: 4px;
-  font-size: 14px;
-  font-weight: 600;
-}
-.btn-secondary:hover { text-decoration: underline; }
-
-.btn-primary {
-  padding: 10px 16px;
-  background: var(--accent);
-  color: white;
-  border-radius: 4px;
-  font-size: 14px;
-  font-weight: 600;
-}
-.btn-primary:hover:not(:disabled) { background: var(--accent-hover); }
-.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
-
-/* Mobile: horizontal grid layout */
+/* Mobile */
 .server-bar-mobile {
   width: 100%;
   height: 100%;
@@ -129,27 +91,9 @@
   gap: 12px;
   overflow-y: auto;
   background: var(--bg-secondary);
+  border-right: none;
 }
 
-.server-bar-mobile .server-divider {
-  width: 100%;
-  height: 1px;
-}
-
-.server-bar-mobile .server-icon {
-  width: 56px;
-  height: 56px;
-  font-size: 18px;
-}
-
-/* Mobile header */
-.server-bar-mobile::before {
-  content: 'Your Servers';
-  width: 100%;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--text-muted);
-  padding: 0 4px 4px;
-}
+.server-bar-mobile .server-divider { width: 100%; height: 1px; margin: 4px 0; }
+.server-bar-mobile .server-icon { width: 52px; height: 52px; }
+.server-bar-mobile .server-active-indicator { display: none; }

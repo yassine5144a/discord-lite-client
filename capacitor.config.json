@@ -3,7 +3,7 @@
   "appName": "Discord Lite",
   "webDir": "build",
   "server": {
-    "url": "https://web-production-cafaa.up.railway.app",
+    "url": "https://discord-lite-client.vercel.app",
     "cleartext": true,
     "androidScheme": "https"
   },
