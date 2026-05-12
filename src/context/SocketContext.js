@@ -15,7 +15,7 @@ export function SocketProvider({ children }) {
     const SERVER_URL = process.env.REACT_APP_SERVER_URL || 'https://web-production-cafaa.up.railway.app';
     socketRef.current = io(SERVER_URL, {
       auth: { token },
-      transports: ['websocket'],
+      transports: ['polling', 'websocket'],
       reconnectionDelay: 2000,
       reconnectionAttempts: 5
     });
