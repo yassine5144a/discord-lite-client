@@ -1,20 +1,9 @@
 .members-list {
-  width: 220px;
+  width: 240px;
   background: var(--bg-secondary);
-  border-left: 1px solid var(--border-subtle);
+  padding: 16px 8px;
   overflow-y: auto;
   flex-shrink: 0;
-  position: relative;
-}
-
-.members-header {
-  padding: 16px 12px 8px;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  color: var(--text-muted);
-  border-bottom: 1px solid var(--border-subtle);
 }
 
 .members-category {
@@ -23,7 +12,8 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: var(--text-muted);
-  padding: 12px 12px 4px;
+  padding: 4px 8px;
+  margin-bottom: 4px;
 }
 
 .member-item {
@@ -31,91 +21,82 @@
   align-items: center;
   gap: 8px;
   padding: 6px 8px;
-  border-radius: var(--radius-sm);
-  margin: 1px 8px;
+  border-radius: 4px;
   cursor: pointer;
   transition: background 0.1s;
-  position: relative;
 }
 
 .member-item:hover { background: var(--bg-hover); }
-.member-item:hover .member-menu-btn { opacity: 1; }
+
+.member-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.member-avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.status-dot {
+  position: absolute;
+  bottom: -1px;
+  right: -1px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--bg-secondary);
+}
+
+.status-online { background: var(--success); }
+.status-idle { background: var(--warning); }
+.status-dnd { background: var(--danger); }
+.status-offline { background: var(--text-muted); }
 
 .member-info {
-  flex: 1;
-  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  overflow: hidden;
 }
 
 .member-name {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.member-item:hover .member-name { color: var(--text-primary); }
-
-.member-menu-btn {
-  background: none;
-  color: var(--text-muted);
-  font-size: 16px;
-  padding: 2px 4px;
-  border-radius: var(--radius-sm);
-  opacity: 0;
-  transition: opacity 0.15s, background 0.15s;
-  flex-shrink: 0;
-}
-.member-menu-btn:hover { background: var(--bg-primary); color: var(--text-primary); }
-
-/* Context menu */
-.context-menu {
-  position: fixed;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 4px;
-  min-width: 160px;
-  z-index: 1000;
-  box-shadow: var(--shadow);
-  animation: modalIn 0.15s ease;
-}
-
-.context-menu-label {
+.member-role {
   font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--text-muted);
-  padding: 6px 8px 4px;
+  color: var(--accent);
+  text-transform: capitalize;
 }
 
-.context-menu button {
-  display: block;
-  width: 100%;
-  padding: 7px 8px;
-  background: none;
-  color: var(--text-primary);
-  font-size: 13px;
-  text-align: left;
-  border-radius: var(--radius-sm);
-  transition: background 0.1s;
-}
-.context-menu button:hover { background: var(--bg-hover); }
-.context-menu button.danger { color: var(--danger); }
-.context-menu button.danger:hover { background: rgba(248,81,73,0.1); }
-
-.context-menu-divider {
-  height: 1px;
-  background: var(--border);
-  margin: 4px 0;
-}
-
-/* Mobile */
+/* ── Mobile ── */
 @media (max-width: 768px) {
-  .members-list { width: 100%; height: 100%; border-left: none; }
+  .members-list {
+    width: 100%;
+    height: 100%;
+    padding: 16px 12px;
+  }
+
+  .member-item {
+    padding: 10px 12px;
+  }
+
+  .member-name {
+    font-size: 15px;
+  }
 }

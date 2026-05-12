@@ -1,244 +1,38 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* ── Dark Theme (default) ── */
-:root, [data-theme="dark"] {
-  --bg-primary: #0f1117;
-  --bg-secondary: #161b22;
-  --bg-tertiary: #1c2128;
-  --bg-hover: #21262d;
-  --bg-card: #1c2128;
-  --accent: #7c6af7;
-  --accent-hover: #6a58e0;
-  --accent-glow: rgba(124, 106, 247, 0.25);
-  --text-primary: #e6edf3;
-  --text-secondary: #8b949e;
-  --text-muted: #484f58;
-  --danger: #f85149;
-  --success: #3fb950;
-  --warning: #d29922;
-  --border: #30363d;
-  --border-subtle: #21262d;
+:root {
+  --bg-primary: #1e1f22;
+  --bg-secondary: #2b2d31;
+  --bg-tertiary: #313338;
+  --bg-hover: #35373c;
+  --accent: #5865f2;
+  --accent-hover: #4752c4;
+  --text-primary: #f2f3f5;
+  --text-secondary: #b5bac1;
+  --text-muted: #80848e;
+  --danger: #ed4245;
+  --success: #23a55a;
+  --warning: #f0b232;
+  --border: #3f4147;
   --sidebar-width: 240px;
-  --server-bar-width: 68px;
-  --radius: 8px;
-  --radius-sm: 4px;
-  --radius-lg: 12px;
-  --shadow: 0 8px 32px rgba(0,0,0,0.4);
-  --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
-
-  /* Role colors */
-  --role-owner: #f0b232;
-  --role-admin: #f85149;
-  --role-moderator: #7c6af7;
-  --role-member: #8b949e;
-}
-
-/* ── Light Theme ── */
-[data-theme="light"] {
-  --bg-primary: #f6f8fa;
-  --bg-secondary: #ffffff;
-  --bg-tertiary: #f0f2f5;
-  --bg-hover: #e8ecf0;
-  --bg-card: #ffffff;
-  --accent: #6e57e0;
-  --accent-hover: #5a45c8;
-  --accent-glow: rgba(110, 87, 224, 0.15);
-  --text-primary: #1c2128;
-  --text-secondary: #57606a;
-  --text-muted: #8c959f;
-  --danger: #cf222e;
-  --success: #1a7f37;
-  --warning: #9a6700;
-  --border: #d0d7de;
-  --border-subtle: #eaeef2;
-  --shadow: 0 8px 32px rgba(0,0,0,0.12);
-  --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
+  --server-bar-width: 72px;
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   background: var(--bg-primary);
   color: var(--text-primary);
   height: 100vh;
   overflow: hidden;
-  transition: background 0.2s, color 0.2s;
 }
 
 #root { height: 100vh; display: flex; }
 
-/* ── Scrollbar ── */
-::-webkit-scrollbar { width: 4px; height: 4px; }
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+::-webkit-scrollbar-thumb { background: var(--bg-primary); border-radius: 3px; }
 
-/* ── Base ── */
-button { cursor: pointer; border: none; outline: none; font-family: inherit; }
-input, textarea { outline: none; border: none; font-family: inherit; }
+button { cursor: pointer; border: none; outline: none; }
+input, textarea { outline: none; border: none; }
 a { text-decoration: none; color: inherit; }
-
-/* ── Shared Modal ── */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.6);
-  backdrop-filter: blur(4px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: 16px;
-}
-
-.modal {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 24px;
-  width: 100%;
-  max-width: 440px;
-  box-shadow: var(--shadow);
-  animation: modalIn 0.2s ease;
-}
-
-@keyframes modalIn {
-  from { opacity: 0; transform: scale(0.95) translateY(8px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
-}
-
-.modal h2 {
-  font-size: 18px;
-  font-weight: 700;
-  margin-bottom: 16px;
-  color: var(--text-primary);
-}
-
-.modal input {
-  width: 100%;
-  padding: 10px 12px;
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  color: var(--text-primary);
-  font-size: 15px;
-  margin-bottom: 16px;
-  transition: border-color 0.15s;
-}
-
-.modal input:focus { border-color: var(--accent); }
-
-.modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
-
-/* ── Shared Buttons ── */
-.btn-primary {
-  padding: 9px 18px;
-  background: var(--accent);
-  color: white;
-  border-radius: var(--radius-sm);
-  font-size: 14px;
-  font-weight: 600;
-  transition: background 0.15s, transform 0.1s;
-}
-.btn-primary:hover:not(:disabled) { background: var(--accent-hover); transform: translateY(-1px); }
-.btn-primary:active { transform: translateY(0); }
-.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-
-.btn-secondary {
-  padding: 9px 18px;
-  background: transparent;
-  color: var(--text-secondary);
-  border-radius: var(--radius-sm);
-  font-size: 14px;
-  font-weight: 600;
-  transition: color 0.15s, background 0.15s;
-}
-.btn-secondary:hover { color: var(--text-primary); background: var(--bg-hover); }
-
-.btn-danger {
-  padding: 9px 18px;
-  background: var(--danger);
-  color: white;
-  border-radius: var(--radius-sm);
-  font-size: 14px;
-  font-weight: 600;
-}
-.btn-danger:hover { opacity: 0.85; }
-
-/* ── Form groups ── */
-.form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
-
-.form-group label {
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  color: var(--text-secondary);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.form-group input,
-.form-group textarea,
-.form-group select {
-  padding: 10px 12px;
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  color: var(--text-primary);
-  font-size: 15px;
-  transition: border-color 0.15s, box-shadow 0.15s;
-}
-
-.form-group input:focus,
-.form-group textarea:focus,
-.form-group select:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-glow);
-}
-
-.form-group textarea { resize: vertical; font-family: inherit; }
-.form-group select { cursor: pointer; }
-
-/* ── Role badges ── */
-.role-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 8px;
-  border-radius: 10px;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: capitalize;
-}
-.role-badge.owner { background: rgba(240,178,50,0.15); color: var(--role-owner); }
-.role-badge.admin { background: rgba(248,81,73,0.15); color: var(--role-admin); }
-.role-badge.moderator { background: rgba(124,106,247,0.15); color: var(--role-moderator); }
-.role-badge.member { background: var(--bg-hover); color: var(--role-member); }
-
-/* ── Avatar ── */
-.avatar {
-  border-radius: 50%;
-  background: var(--accent);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  flex-shrink: 0;
-  overflow: hidden;
-  position: relative;
-}
-.avatar img { width: 100%; height: 100%; object-fit: cover; }
-
-.status-dot {
-  position: absolute;
-  bottom: -1px;
-  right: -1px;
-  border-radius: 50%;
-  border: 2px solid var(--bg-secondary);
-}
-.status-dot.sm { width: 10px; height: 10px; }
-.status-dot.md { width: 12px; height: 12px; }
-.status-online { background: var(--success); }
-.status-idle { background: var(--warning); }
-.status-dnd { background: var(--danger); }
-.status-offline { background: var(--text-muted); }
