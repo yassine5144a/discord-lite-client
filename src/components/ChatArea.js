@@ -89,10 +89,12 @@ export default function ChatArea({ server, channel }) {
     };
 
     const onMention = ({ from, content }) => {
-      // Browser notification for mentions
-      if (Notification.permission === 'granted') {
-        new Notification(`${from} mentioned you`, { body: content, icon: '/icon-192.png' });
-      }
+      // Browser notification for mentions - only if supported
+      try {
+        if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+          new Notification(`${from} mentioned you`, { body: content, icon: '/icon-192.png' });
+        }
+      } catch (e) { /* Notification not supported in WebView */ }
     };
 
     socket.on('message:new', onNew);
@@ -102,8 +104,12 @@ export default function ChatArea({ server, channel }) {
     socket.on('typing:stop', onTypingStop);
     socket.on('notification:mention', onMention);
 
-    // Request notification permission
-    if (Notification.permission === 'default') Notification.requestPermission();
+    // Request notification permission - only if supported
+    try {
+      if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
+        Notification.requestPermission();
+      }
+    } catch (e) { /* Not supported */ }
 
     return () => {
       socket.off('message:new', onNew);
