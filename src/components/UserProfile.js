@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../api';
 import { useAuth } from '../context/AuthContext';
 import './UserProfile.css';
 
@@ -25,7 +25,7 @@ export default function UserProfile({ onClose }) {
     e.preventDefault();
     setLoading(true);
     try {
-      const { data } = await axios.patch('/api/users/me', { username, bio });
+      const { data } = await api.patch('/api/users/me', { username, bio });
       setUser(data);
       showMsg('Profile updated!');
     } catch (err) {
@@ -39,7 +39,7 @@ export default function UserProfile({ onClose }) {
     if (newPw.length < 6) return showMsg('Password must be at least 6 chars', 'error');
     setLoading(true);
     try {
-      await axios.post('/api/users/me/password', { currentPassword: currentPw, newPassword: newPw });
+      await api.post('/api/users/me/password', { currentPassword: currentPw, newPassword: newPw });
       showMsg('Password changed!');
       setCurrentPw(''); setNewPw(''); setConfirmPw('');
     } catch (err) {
@@ -54,7 +54,7 @@ export default function UserProfile({ onClose }) {
     formData.append('avatar', file);
     setLoading(true);
     try {
-      const { data } = await axios.post('/api/users/me/avatar', formData, {
+      const { data } = await api.post('/api/users/me/avatar', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       setUser(data);

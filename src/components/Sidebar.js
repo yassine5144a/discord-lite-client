@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../api';
 import { useAuth } from '../context/AuthContext';
 import './Sidebar.css';
 
@@ -17,7 +17,7 @@ export default function Sidebar({ server, activeChannelId, onSelectChannel, onSe
     e.preventDefault();
     if (!newChannelName.trim()) return;
     try {
-      const { data } = await axios.post(`/api/servers/${server._id}/channels`, {
+      const { data } = await api.post(`/api/servers/${server._id}/channels`, {
         name: newChannelName.trim().toLowerCase().replace(/\s+/g, '-'),
         type: newChannelType
       });

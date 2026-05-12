@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api';
 import ServerBar from '../components/ServerBar';
 import Sidebar from '../components/Sidebar';
 import ChatArea from '../components/ChatArea';
@@ -20,7 +20,7 @@ export default function Home() {
   const [showServerSettings, setShowServerSettings] = useState(false); // current mobile panel
 
   useEffect(() => {
-    axios.get('/api/servers')
+    api.get('/api/servers')
       .then(({ data }) => setServers(data))
       .catch(console.error);
   }, []);
@@ -31,7 +31,7 @@ export default function Home() {
       setActiveChannel(null);
       return;
     }
-    axios.get(`/api/servers/${activeServerId}`)
+    api.get(`/api/servers/${activeServerId}`)
       .then(({ data }) => {
         setActiveServer(data);
         const firstText = data.channels?.find(c => c.type === 'text');

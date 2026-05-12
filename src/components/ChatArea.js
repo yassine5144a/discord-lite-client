@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import axios from 'axios';
+import api from '../api';
 import { useSocket } from '../context/SocketContext';
 import { useAuth } from '../context/AuthContext';
 import './ChatArea.css';
@@ -30,7 +30,7 @@ export default function ChatArea({ server, channel }) {
   const loadMessages = useCallback(async (p = 1) => {
     if (!server || !channel) return;
     try {
-      const { data } = await axios.get(
+      const { data } = await api.get(
         `/api/servers/${server._id}/channels/${channel._id}/messages?page=${p}&limit=30`
       );
       if (p === 1) {
@@ -188,7 +188,7 @@ export default function ChatArea({ server, channel }) {
     try {
       const formData = new FormData();
       formData.append('file', file);
-      const { data } = await axios.post(
+      const { data } = await api.post(
         `/api/servers/${server._id}/channels/${channel._id}/upload`,
         formData, { headers: { 'Content-Type': 'multipart/form-data' } }
       );

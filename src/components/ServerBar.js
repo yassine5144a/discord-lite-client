@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../api';
 import './ServerBar.css';
 
 export default function ServerBar({ servers, activeServerId, onSelectServer, onServerCreated, mobile }) {
@@ -14,7 +14,7 @@ export default function ServerBar({ servers, activeServerId, onSelectServer, onS
     if (!name.trim()) return;
     setLoading(true);
     try {
-      const { data } = await axios.post('/api/servers', { name });
+      const { data } = await api.post('/api/servers', { name });
       onServerCreated(data);
       setName('');
       setShowCreate(false);
@@ -30,7 +30,7 @@ export default function ServerBar({ servers, activeServerId, onSelectServer, onS
     if (!code.trim()) return;
     setLoading(true);
     try {
-      const { data } = await axios.post(`/api/servers/join/${code.trim()}`);
+      const { data } = await api.post(`/api/servers/join/${code.trim()}`);
       onServerCreated(data);
       setCode('');
       setShowJoin(false);

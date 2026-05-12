@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../api';
 import './ServerSettings.css';
 
 const SERVER_URL = process.env.REACT_APP_SERVER_URL || '';
@@ -19,7 +19,7 @@ export default function ServerSettings({ server, onClose, onUpdated }) {
     if (!name.trim()) return;
     setLoading(true);
     try {
-      const { data } = await axios.patch(`/api/servers/${server._id}`, { name });
+      const { data } = await api.patch(`/api/servers/${server._id}`, { name });
       onUpdated(data);
       showMsg('Server name updated!');
     } catch (err) {
@@ -34,7 +34,7 @@ export default function ServerSettings({ server, onClose, onUpdated }) {
     formData.append('icon', file);
     setLoading(true);
     try {
-      const { data } = await axios.post(`/api/servers/${server._id}/icon`, formData, {
+      const { data } = await api.post(`/api/servers/${server._id}/icon`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       onUpdated(data);
