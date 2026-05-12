@@ -8,12 +8,14 @@
     "androidScheme": "https"
   },
   "android": {
-    "allowMixedContent": true
+    "allowMixedContent": true,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": true
   },
   "plugins": {
     "SplashScreen": {
-      "launchShowDuration": 2000,
-      "backgroundColor": "#1e1f22",
+      "launchShowDuration": 1000,
+      "backgroundColor": "#0f1117",
       "showSpinner": false
     }
   }
