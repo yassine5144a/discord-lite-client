@@ -170,12 +170,31 @@ export default function ChatArea({ server, channel }) {
 
   const translateMessage = async (msgId, content) => {
     if (translating[msgId]) return;
+
+    // Detect if already translated - toggle off
+    if (translations[msgId]) {
+      setTranslationsMap(prev => { const n = { ...prev }; delete n[msgId]; return n; });
+      return;
+    }
+
     setTranslating(prev => ({ ...prev, [msgId]: true }));
     try {
-      const { data } = await api.post('/api/ai/translate', { text: content, targetLang: lang });
-      setTranslationsMap(prev => ({ ...prev, [msgId]: data.translation }));
-    } catch (err) { addToast('Translation failed', 'error'); }
-    finally { setTranslating(prev => ({ ...prev, [msgId]: false })); }
+      // Auto-detect: if content is Arabic translate to English, otherwise translate to Arabic
+      const hasArabic = /[\u0600-\u06FF]/.test(content);
+      const targetLang = hasArabic ? 'en' : (lang === 'en' ? 'ar' : lang);
+
+      const { data } = await api.post('/api/ai/translate', { text: content, targetLang });
+
+      if (!data.translation || data.translation === content) {
+        setTranslationsMap(prev => ({ ...prev, [msgId]: '(Same language)' }));
+      } else {
+        setTranslationsMap(prev => ({ ...prev, [msgId]: data.translation }));
+      }
+    } catch (err) {
+      addToast('Translation failed', 'error');
+    } finally {
+      setTranslating(prev => ({ ...prev, [msgId]: false }));
+    }
   };
 
   const summarizeChat = async () => {
