@@ -359,3 +359,42 @@
 [data-theme="light"] .auth-form-mobile input {
   background: rgba(0,0,0,0.04);
 }
+
+/* ── Google button ── */
+.auth-btn-google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 11px 16px;
+  background: white;
+  color: #333;
+  border: 1px solid #ddd;
+  border-radius: 40px;
+  font-size: 0.9em;
+  font-weight: 600;
+  font-family: 'Montserrat', sans-serif;
+  cursor: pointer;
+  transition: box-shadow 0.15s, transform 0.1s;
+  margin-top: 8px;
+}
+.auth-btn-google:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.15); transform: translateY(-1px); }
+.auth-btn-google:active { transform: scale(0.97); }
+
+/* ── Divider ── */
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 0 4px;
+  color: var(--text-muted);
+  font-size: 0.8em;
+}
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
