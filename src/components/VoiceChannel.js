@@ -47,8 +47,9 @@ const AUDIO_CONSTRAINTS = {
     echoCancellation: true,
     noiseSuppression: true,
     autoGainControl: true,
-    sampleRate: 16000,
-    channelCount: 1
+    sampleRate: 12000,      // 12kHz = توازن بين الجودة والبيانات
+    channelCount: 1,        // Mono
+    sampleSize: 16
   },
   video: false
 };

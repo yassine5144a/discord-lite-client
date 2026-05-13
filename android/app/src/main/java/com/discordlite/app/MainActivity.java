@@ -1,7 +1,9 @@
 package com.discordlite.app;
 
 import android.annotation.SuppressLint;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.webkit.GeolocationPermissions;
 import android.webkit.PermissionRequest;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
@@ -9,13 +11,16 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.view.WindowManager;
-import android.net.Uri;
+import android.Manifest;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 public class MainActivity extends AppCompatActivity {
 
     private WebView webView;
     private static final String BASE_URL = "https://discord-lite-client.vercel.app";
+    private static final int PERMISSION_REQUEST_CODE = 100;
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override
@@ -26,6 +31,9 @@ public class MainActivity extends AppCompatActivity {
             WindowManager.LayoutParams.FLAG_FULLSCREEN,
             WindowManager.LayoutParams.FLAG_FULLSCREEN
         );
+
+        // Request microphone permission upfront
+        requestMicrophonePermission();
 
         webView = new WebView(this);
         setContentView(webView);
@@ -38,9 +46,16 @@ public class MainActivity extends AppCompatActivity {
         settings.setAllowContentAccess(true);
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
         settings.setDatabaseEnabled(true);
-        settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
+        settings.setCacheMode(WebSettings.LOAD_DEFAULT);
         settings.setUseWideViewPort(true);
         settings.setLoadWithOverviewMode(true);
+
+        // Enable WebRTC
+        try {
+            android.webkit.WebView.setWebContentsDebuggingEnabled(true);
+            java.lang.reflect.Method method = WebSettings.class.getMethod("setMediaPlaybackRequiresUserGesture", boolean.class);
+            method.invoke(settings, false);
+        } catch (Exception e) { /* ignore */ }
 
         // Mobile user agent
         settings.setUserAgentString(
@@ -49,9 +64,16 @@ public class MainActivity extends AppCompatActivity {
         );
 
         webView.setWebChromeClient(new WebChromeClient() {
+            // Grant all permissions automatically (microphone, camera)
             @Override
             public void onPermissionRequest(PermissionRequest request) {
                 runOnUiThread(() -> request.grant(request.getResources()));
+            }
+
+            // Handle geolocation if needed
+            @Override
+            public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
+                callback.invoke(origin, true, false);
             }
         });
 
@@ -59,15 +81,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 String url = request.getUrl().toString();
-                if (url.startsWith(BASE_URL) || url.contains("vercel.app") || url.contains("railway.app")) {
-                    return false;
-                }
-                return true;
-            }
-
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                if (url.startsWith(BASE_URL) || url.contains("vercel.app") || url.contains("railway.app")) {
+                if (url.startsWith("https://discord-lite-client.vercel.app") ||
+                    url.startsWith("https://web-production-cafaa.up.railway.app")) {
                     return false;
                 }
                 return true;
@@ -76,16 +91,46 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
-                // Force mobile viewport and screen width
+                // Fix viewport for mobile
                 view.evaluateJavascript(
-                    "document.querySelector('meta[name=viewport]').setAttribute('content'," +
-                    "'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');",
+                    "(function() {" +
+                    "  var meta = document.querySelector('meta[name=viewport]');" +
+                    "  if(meta) meta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0');" +
+                    "})();",
                     null
                 );
             }
         });
 
         webView.loadUrl(BASE_URL);
+    }
+
+    private void requestMicrophonePermission() {
+        String[] permissions = {
+            Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.MODIFY_AUDIO_SETTINGS
+        };
+
+        boolean allGranted = true;
+        for (String permission : permissions) {
+            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+                allGranted = false;
+                break;
+            }
+        }
+
+        if (!allGranted) {
+            ActivityCompat.requestPermissions(this, permissions, PERMISSION_REQUEST_CODE);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        // Reload WebView after permissions granted
+        if (requestCode == PERMISSION_REQUEST_CODE && webView != null) {
+            webView.reload();
+        }
     }
 
     @Override
