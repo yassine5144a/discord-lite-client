@@ -2,15 +2,30 @@ import React, { useState, useRef, useEffect } from 'react';
 import api from '../api';
 import './AIChat.css';
 
+const STORAGE_KEY = 'dl_ai_history';
+const MAX_HISTORY = 50;
+
 export default function AIChat({ onClose }) {
-  const [messages, setMessages] = useState([
-    { role: 'assistant', content: 'مرحباً! أنا مساعدك الذكي. كيف يمكنني مساعدتك؟\nHello! I\'m your AI assistant. How can I help you?' }
-  ]);
+  const [messages, setMessages] = useState(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      return saved ? JSON.parse(saved) : [
+        { role: 'assistant', content: 'مرحباً! أنا مساعدك الذكي. كيف يمكنني مساعدتك؟\nHello! I\'m your AI assistant. How can I help you?' }
+      ];
+    } catch {
+      return [{ role: 'assistant', content: 'مرحباً! أنا مساعدك الذكي.\nHello! I\'m your AI assistant.' }];
+    }
+  });
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
   const bottomRef = useRef(null);
 
+  // Save to localStorage on every message
   useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(messages.slice(-MAX_HISTORY)));
+    } catch {}
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
@@ -34,26 +49,70 @@ export default function AIChat({ onClose }) {
       setMessages(prev => [...prev, {
         role: 'assistant',
         content: err.response?.data?.message === 'AI not configured'
-          ? '⚠️ AI not configured yet. Add GROQ_API_KEY to Railway variables.'
-          : '❌ Error: ' + (err.response?.data?.message || err.message)
+          ? '⚠️ AI not configured. Add GROQ_API_KEY to Railway.'
+          : '❌ ' + (err.response?.data?.message || err.message)
       }]);
     } finally {
       setLoading(false);
     }
   };
 
+  const clearHistory = () => {
+    const initial = [{ role: 'assistant', content: 'مرحباً! أنا مساعدك الذكي.\nHello! I\'m your AI assistant.' }];
+    setMessages(initial);
+    localStorage.removeItem(STORAGE_KEY);
+  };
+
   return (
     <div className="ai-overlay" onClick={onClose}>
       <div className="ai-chat" onClick={e => e.stopPropagation()}>
+        {/* Header */}
         <div className="ai-header">
           <div className="ai-title">
             <span className="ai-icon">🤖</span>
             <span>AI Assistant</span>
             <span className="ai-badge">Groq</span>
           </div>
-          <button onClick={onClose} className="ai-close">✕</button>
+          <div className="ai-header-actions">
+            <button
+              className="ai-action-btn"
+              onClick={() => setShowHistory(!showHistory)}
+              title="History"
+              aria-label="Toggle history"
+            >
+              🕐
+            </button>
+            <button
+              className="ai-action-btn"
+              onClick={clearHistory}
+              title="Clear history"
+              aria-label="Clear history"
+            >
+              🗑
+            </button>
+            <button onClick={onClose} className="ai-close">✕</button>
+          </div>
         </div>
 
+        {/* History panel */}
+        {showHistory && (
+          <div className="ai-history-panel">
+            <div className="ai-history-header">
+              <span>📋 Conversation History ({messages.length} messages)</span>
+              <button onClick={() => setShowHistory(false)}>✕</button>
+            </div>
+            <div className="ai-history-list">
+              {messages.map((msg, i) => (
+                <div key={i} className={`ai-history-item ${msg.role}`}>
+                  <span className="ai-history-role">{msg.role === 'user' ? '👤' : '🤖'}</span>
+                  <span className="ai-history-text">{msg.content.slice(0, 80)}{msg.content.length > 80 ? '...' : ''}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Messages */}
         <div className="ai-messages">
           {messages.map((msg, i) => (
             <div key={i} className={`ai-message ${msg.role}`}>
@@ -72,6 +131,7 @@ export default function AIChat({ onClose }) {
           <div ref={bottomRef} />
         </div>
 
+        {/* Input */}
         <form className="ai-input-form" onSubmit={sendMessage}>
           <input
             type="text"

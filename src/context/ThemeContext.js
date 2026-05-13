@@ -17,9 +17,11 @@ export function ThemeProvider({ children }) {
   useEffect(() => {
     // Apply accent color as CSS variable
     document.documentElement.style.setProperty('--accent', accentColor);
-    // Generate hover color (slightly darker)
-    document.documentElement.style.setProperty('--accent-hover', accentColor + 'cc');
+    // Generate hover color (10% darker using opacity trick)
+    document.documentElement.style.setProperty('--accent-hover', accentColor);
     document.documentElement.style.setProperty('--accent-glow', accentColor + '40');
+    // Apply filter for hover effect via CSS
+    document.documentElement.style.setProperty('--accent-filter', 'brightness(0.85)');
     localStorage.setItem('dl_accent', accentColor);
   }, [accentColor]);
 

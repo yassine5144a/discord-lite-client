@@ -127,7 +127,7 @@ a { text-decoration: none; color: inherit; }
   font-weight: 600;
   transition: background 0.15s, transform 0.1s;
 }
-.btn-primary:hover:not(:disabled) { background: var(--accent-hover); transform: translateY(-1px); }
+.btn-primary:hover:not(:disabled) { filter: brightness(0.85); transform: translateY(-1px); }
 .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .btn-secondary {
