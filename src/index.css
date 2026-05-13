@@ -304,3 +304,177 @@ button:active:not(:disabled) { transform: scale(0.97); }
 }
 
 .badge-icon { font-size: 16px; }
+
+/* ── Glassmorphism ── */
+.sidebar,
+.members-list,
+.dm-list {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* ── Message Bubbles (own messages on right) ── */
+.message.own-message {
+  flex-direction: row-reverse;
+}
+
+.message.own-message .message-body {
+  align-items: flex-end;
+}
+
+.message.own-message .message-content {
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  color: white;
+  padding: 8px 12px;
+  border-radius: 16px 16px 4px 16px;
+  display: inline-block;
+  max-width: 70%;
+}
+
+.message.own-message .message-header {
+  flex-direction: row-reverse;
+}
+
+.message.own-message .message-avatar {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+/* ── Smooth channel transitions ── */
+.messages-container {
+  transition: opacity 0.15s ease;
+}
+
+.messages-container.loading {
+  opacity: 0.5;
+}
+
+/* ── Channel item hover animation ── */
+.channel-item {
+  transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease, padding-left 0.15s ease;
+}
+
+.channel-item:hover {
+  padding-left: 20px;
+}
+
+.channel-item.active {
+  padding-left: 20px;
+}
+
+/* ── Server icon animation ── */
+.server-icon {
+  transition: border-radius 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+              background 0.15s ease,
+              transform 0.15s ease,
+              box-shadow 0.15s ease;
+}
+
+.server-icon:hover {
+  transform: scale(1.08) translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+}
+
+/* ── Glassmorphism modals ── */
+.modal {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background: rgba(22, 27, 34, 0.85);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+[data-theme="light"] .modal {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(0,0,0,0.08);
+}
+
+/* ── Sidebar glassmorphism ── */
+[data-theme="dark"] .sidebar,
+[data-theme="dark"] .server-bar,
+[data-theme="dark"] .members-list {
+  background: rgba(22, 27, 34, 0.85);
+}
+
+/* ── Chat area subtle gradient ── */
+.chat-area {
+  background: linear-gradient(180deg, var(--bg-tertiary) 0%, var(--bg-primary) 100%);
+}
+
+/* ── Message hover glow ── */
+.message:hover {
+  background: rgba(124, 106, 247, 0.03);
+}
+
+/* ── Input focus glow ── */
+.chat-input:focus {
+  box-shadow: 0 0 0 2px var(--accent-glow), 0 4px 16px rgba(0,0,0,0.2);
+}
+
+/* ── Send button gradient ── */
+.send-btn {
+  background: linear-gradient(135deg, var(--accent), #6a58e0);
+  box-shadow: 0 2px 8px var(--accent-glow);
+}
+
+.send-btn:hover:not(:disabled) {
+  transform: scale(1.08) translateY(-1px);
+  box-shadow: 0 4px 16px var(--accent-glow);
+}
+
+/* ── FAB glow ── */
+.fab-ai {
+  background: linear-gradient(135deg, var(--accent), #f85149);
+  box-shadow: 0 4px 16px var(--accent-glow);
+}
+
+.fab-ai:hover {
+  box-shadow: 0 8px 24px var(--accent-glow);
+}
+
+/* ── Smooth page transitions ── */
+.mobile-panel.active {
+  animation: panelSlideIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes panelSlideIn {
+  from { opacity: 0; transform: translateX(10px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ── Avatar speaking glow ── */
+.participant.speaking .participant-avatar {
+  box-shadow: 0 0 0 3px var(--success), 0 0 16px rgba(63, 185, 80, 0.4);
+  animation: speakingGlow 1s ease-in-out infinite;
+}
+
+@keyframes speakingGlow {
+  0%, 100% { box-shadow: 0 0 0 3px var(--success), 0 0 16px rgba(63, 185, 80, 0.4); }
+  50%       { box-shadow: 0 0 0 5px var(--success), 0 0 28px rgba(63, 185, 80, 0.6); }
+}
+
+/* ── Unread indicator ── */
+.channel-item.has-unread::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-primary);
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* ── Toast animation improvement ── */
+.toast {
+  animation: toastSlide 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes toastSlide {
+  from { opacity: 0; transform: translateX(60px) scale(0.85); }
+  to   { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+/* ── Scrollbar glow ── */
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+  box-shadow: 0 0 6px var(--accent-glow);
+}

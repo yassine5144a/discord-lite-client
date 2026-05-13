@@ -343,7 +343,7 @@ export default function ChatArea({ server, channel }) {
           );
 
           return (
-            <div key={item.key} className={`message ${showHeader ? 'with-header' : 'compact'} ${msg.pinned ? 'pinned' : ''}`}>
+            <div key={item.key} className={`message ${showHeader ? 'with-header' : 'compact'} ${msg.pinned ? 'pinned' : ''} ${isOwn ? 'own-message' : ''}`}>
               {showHeader && (
                 <div className="message-avatar">
                   {msg.author?.avatar ? <img src={`${SERVER_URL}${msg.author.avatar}`} alt={msg.author?.username} /> : msg.author?.username?.slice(0, 2).toUpperCase()}
