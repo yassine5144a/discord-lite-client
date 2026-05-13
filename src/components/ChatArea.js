@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import api from '../api';
+import api, { getAvatarUrl } from '../api';
 import { useSocket } from '../context/SocketContext';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from './Toast';
@@ -346,7 +346,7 @@ export default function ChatArea({ server, channel }) {
             <div key={item.key} className={`message ${showHeader ? 'with-header' : 'compact'} ${msg.pinned ? 'pinned' : ''} ${isOwn ? 'own-message' : ''}`}>
               {showHeader && (
                 <div className="message-avatar">
-                  {msg.author?.avatar ? <img src={`${SERVER_URL}${msg.author.avatar}`} alt={msg.author?.username} /> : msg.author?.username?.slice(0, 2).toUpperCase()}
+                  {msg.author?.avatar ? <img src={getAvatarUrl(msg.author.avatar)} alt={msg.author?.username} /> : msg.author?.username?.slice(0, 2).toUpperCase()}
                 </div>
               )}
               {!showHeader && <div className="message-time-stub">{formatTime(msg.createdAt)}</div>}
@@ -429,7 +429,7 @@ export default function ChatArea({ server, channel }) {
         <div className="mention-dropdown">
           {mentionList.map(m => (
             <button key={m.user._id} className="mention-item" onClick={() => insertMention(m)}>
-              <div className="mention-avatar">{m.user.avatar ? <img src={`${SERVER_URL}${m.user.avatar}`} alt={m.user.username} /> : m.user.username.slice(0, 2).toUpperCase()}</div>
+              <div className="mention-avatar">{m.user.avatar ? <img src={getAvatarUrl(m.user.avatar)} alt={m.user.username} /> : m.user.username.slice(0, 2).toUpperCase()}</div>
               @{m.user.username}
             </button>
           ))}

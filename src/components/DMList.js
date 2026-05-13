@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import api from '../api';
+import api, { getAvatarUrl } from '../api';
 import { useAuth } from '../context/AuthContext';
 import './DMList.css';
 
@@ -46,7 +46,7 @@ export default function DMList({ onOpenConversation, activeConvoId }) {
           {searchResults.map(u => (
             <button key={u._id} className="dm-search-item" onClick={() => openDM(u._id)}>
               <div className="avatar" style={{ width: 32, height: 32, fontSize: 11 }}>
-                {u.avatar ? <img src={`${SERVER_URL}${u.avatar}`} alt={u.username} /> : u.username.slice(0, 2).toUpperCase()}
+                {u.avatar ? <img src={getAvatarUrl(u.avatar)} alt={u.username} /> : u.username.slice(0, 2).toUpperCase()}
                 <span className={`status-dot sm status-${u.status || 'offline'}`} />
               </div>
               <span>{u.username}</span>
@@ -68,7 +68,7 @@ export default function DMList({ onOpenConversation, activeConvoId }) {
           return (
             <button key={convo._id} className={`dm-item ${activeConvoId === convo._id ? 'active' : ''}`} onClick={() => onOpenConversation(convo)}>
               <div className="avatar" style={{ width: 36, height: 36, fontSize: 13 }}>
-                {other.avatar ? <img src={`${SERVER_URL}${other.avatar}`} alt={other.username} /> : other.username.slice(0, 2).toUpperCase()}
+                {other.avatar ? <img src={getAvatarUrl(other.avatar)} alt={other.username} /> : other.username.slice(0, 2).toUpperCase()}
                 <span className={`status-dot sm status-${other.status || 'offline'}`} />
               </div>
               <div className="dm-item-info">

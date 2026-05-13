@@ -8,6 +8,7 @@ import './VoiceChannel.css';
 // Inner component - inside LiveKitRoom
 function VoiceRoomInner({ onLeave, muted, deafened, speaking, setSpeaking }) {
   const { user } = useAuth();
+  const { t } = useLang();
   const participants = useParticipants();
   const { localParticipant } = useLocalParticipant();
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import api from '../api';
+import api, { getAvatarUrl } from '../api';
 import { useSocket } from '../context/SocketContext';
 import { useAuth } from '../context/AuthContext';
 import './DMChat.css';
@@ -99,7 +99,7 @@ export default function DMChat({ conversation }) {
     <div className="dm-chat">
       <div className="dm-chat-header">
         <div className="avatar" style={{ width: 32, height: 32, fontSize: 11 }}>
-          {otherUser?.avatar ? <img src={`${SERVER_URL}${otherUser.avatar}`} alt={otherUser?.username} /> : otherUser?.username?.slice(0, 2).toUpperCase()}
+          {otherUser?.avatar ? <img src={getAvatarUrl(otherUser.avatar)} alt={otherUser?.username} /> : otherUser?.username?.slice(0, 2).toUpperCase()}
           <span className={`status-dot sm status-${otherUser?.status || 'offline'}`} />
         </div>
         <div>
@@ -117,7 +117,7 @@ export default function DMChat({ conversation }) {
             <div key={item.key} className={`dm-message ${showHeader ? 'with-header' : 'compact'}`}>
               {showHeader ? (
                 <div className="avatar" style={{ width: 34, height: 34, fontSize: 12, flexShrink: 0 }}>
-                  {msg.author?.avatar ? <img src={`${SERVER_URL}${msg.author.avatar}`} alt={msg.author?.username} /> : msg.author?.username?.slice(0, 2).toUpperCase()}
+                  {msg.author?.avatar ? <img src={getAvatarUrl(msg.author.avatar)} alt={msg.author?.username} /> : msg.author?.username?.slice(0, 2).toUpperCase()}
                 </div>
               ) : <div style={{ width: 34, flexShrink: 0 }} />}
               <div className="dm-message-body">

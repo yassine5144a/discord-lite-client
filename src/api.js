@@ -15,3 +15,10 @@ api.interceptors.request.use(config => {
 
 export default api;
 export { API_URL };
+
+// Helper to get correct avatar URL (handles both local and Google avatars)
+export function getAvatarUrl(avatar) {
+  if (!avatar) return null;
+  if (avatar.startsWith('http://') || avatar.startsWith('https://')) return avatar;
+  return `${API_URL}${avatar}`;
+}

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import api from '../api';
+import api, { getAvatarUrl } from '../api';
 import { useAuth } from '../context/AuthContext';
 import { useLang } from '../context/LangContext';
 import './MembersList.css';
@@ -43,7 +43,7 @@ export default function MembersList({ server, onServerUpdated }) {
     return (
       <div className="member-item" onContextMenu={canManage ? (e) => { e.preventDefault(); setContextMenu({ memberId, x: e.clientX, y: e.clientY }); } : undefined}>
         <div className="avatar" style={{ width: 32, height: 32, fontSize: 11 }}>
-          {member.user.avatar ? <img src={`${SERVER_URL}${member.user.avatar}`} alt={member.user.username} /> : member.user.username?.slice(0, 2).toUpperCase()}
+          {member.user.avatar ? <img src={getAvatarUrl(member.user.avatar)} alt={member.user.username} /> : member.user.username?.slice(0, 2).toUpperCase()}
           <span className={`status-dot sm status-${member.user.status || 'offline'}`} />
         </div>
         <div className="member-info">

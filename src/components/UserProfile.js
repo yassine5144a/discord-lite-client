@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import api from '../api';
+import api, { getAvatarUrl } from '../api';
 import { useAuth } from '../context/AuthContext';
 import './UserProfile.css';
 
@@ -77,7 +77,7 @@ export default function UserProfile({ onClose }) {
           <label className="avatar-upload" title="Change avatar">
             <div className="profile-avatar">
               {user?.avatar
-                ? <img src={`${SERVER_URL}${user.avatar}`} alt={user.username} />
+                ? <img src={getAvatarUrl(user.avatar)} alt={user.username} />
                 : user?.username?.slice(0, 2).toUpperCase()
               }
               <div className="avatar-overlay">📷</div>

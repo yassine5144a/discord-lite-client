@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import api from '../api';
+import api, { getAvatarUrl } from '../api';
 import { useAuth } from '../context/AuthContext';
 import { useLang } from '../context/LangContext';
 import './Sidebar.css';

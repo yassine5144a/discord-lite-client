@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import api from '../api';
+import api, { getAvatarUrl } from '../api';
 import { useTheme } from '../context/ThemeContext';
 import { useLang } from '../context/LangContext';
 import './ServerBar.css';
