@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from './Toast';
 import { useLang } from '../context/LangContext';
 import EmojiPicker from './EmojiPicker';
+import XOGame from './XOGame';
 import './ChatArea.css';
 
 const SERVER_URL = process.env.REACT_APP_SERVER_URL || '';
@@ -25,6 +26,7 @@ export default function ChatArea({ server, channel }) {
   const [showMentions, setShowMentions] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [showEmoji, setShowEmoji] = useState(false);
+  const [showXO, setShowXO] = useState(false);
   const { addToast } = useToast();
   const { t } = useLang();
   const bottomRef = useRef(null);
@@ -471,6 +473,15 @@ export default function ChatArea({ server, channel }) {
         >
           {uploading ? '⏳' : '📎'}
         </button>
+        <button
+          type="button"
+          className="attach-btn"
+          onClick={() => setShowXO(true)}
+          title={t('playXO')}
+          aria-label={t('playXO')}
+        >
+          🎮
+        </button>
         <input
           ref={inputRef}
           type="text"
@@ -492,6 +503,15 @@ export default function ChatArea({ server, channel }) {
           ➤
         </button>
       </form>
+
+      {/* XO Game */}
+      {showXO && server && channel && (
+        <XOGame
+          serverId={server._id}
+          channelId={channel._id}
+          onClose={() => setShowXO(false)}
+        />
+      )}
     </div>
   );
 }
