@@ -22,6 +22,8 @@ const RTC_CONFIG = {
   iceServers: [
     { urls: 'stun:stun.l.google.com:19302' },
     { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:stun2.l.google.com:19302' },
+    { urls: 'stun:stun3.l.google.com:19302' },
     // Custom TURN server on Railway
     {
       urls: [
@@ -33,7 +35,9 @@ const RTC_CONFIG = {
     }
   ],
   iceCandidatePoolSize: 10,
-  iceTransportPolicy: 'all'
+  iceTransportPolicy: 'all',
+  bundlePolicy: 'max-bundle',
+  rtcpMuxPolicy: 'require'
 };
 
 const AUDIO_CONSTRAINTS = {
@@ -135,6 +139,20 @@ export default function VoiceChannel({ server, channel }) {
     pc.onicecandidate = (event) => {
       if (event.candidate && socket) {
         socket.emit('webrtc:ice-candidate', { targetUserId, candidate: event.candidate });
+      }
+    };
+
+    // Auto reconnect on failure
+    pc.onconnectionstatechange = () => {
+      console.log(`[WebRTC] ${targetUserId}: ${pc.connectionState}`);
+      if (pc.connectionState === 'failed') {
+        pc.restartIce();
+      }
+    };
+
+    pc.oniceconnectionstatechange = () => {
+      if (pc.iceConnectionState === 'failed') {
+        pc.restartIce();
       }
     };
 
