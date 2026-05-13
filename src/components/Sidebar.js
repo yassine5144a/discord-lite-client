@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
+import { useLang } from '../context/LangContext';
 import './Sidebar.css';
 
 export default function Sidebar({ server, activeChannelId, onSelectChannel, onServerUpdated, onOpenSettings, onOpenProfile }) {
   const { user, logout } = useAuth();
+  const { t } = useLang();
+  const { t } = useLang();
   const [showAddChannel, setShowAddChannel] = useState(false);
   const [newChannelName, setNewChannelName] = useState('');
   const [newChannelType, setNewChannelType] = useState('text');
@@ -59,7 +62,7 @@ export default function Sidebar({ server, activeChannelId, onSelectChannel, onSe
       <div className="channels-list">
         {/* Text channels */}
         <div className="channel-category">
-          <span>TEXT CHANNELS</span>
+          <span>{t('textChannels')}</span>
           {isAdmin && (
             <button
               className="add-channel-btn"
@@ -83,7 +86,7 @@ export default function Sidebar({ server, activeChannelId, onSelectChannel, onSe
 
         {/* Voice channels */}
         <div className="channel-category" style={{ marginTop: 16 }}>
-          <span>VOICE CHANNELS</span>
+          <span>{t('voiceChannels')}</span>
           {isAdmin && (
             <button
               className="add-channel-btn"
@@ -117,9 +120,9 @@ export default function Sidebar({ server, activeChannelId, onSelectChannel, onSe
         </div>
         <div className="user-info">
           <span className="user-name">{user?.username}</span>
-          <span className="user-status">{user?.status || 'offline'}</span>
+          <span className="user-status">{t(user?.status || 'offline')}</span>
         </div>
-        <button className="logout-btn" onClick={logout} title="Log out" aria-label="Log out">
+        <button className="logout-btn" onClick={logout} title={t('logout')} aria-label={t('logout')}>
           ⏻
         </button>
         <button className="settings-btn" onClick={onOpenProfile} title="Profile Settings" aria-label="Profile Settings" style={{marginLeft: 2}}>
@@ -131,35 +134,20 @@ export default function Sidebar({ server, activeChannelId, onSelectChannel, onSe
       {showAddChannel && (
         <div className="modal-overlay" onClick={() => setShowAddChannel(false)}>
           <div className="modal" onClick={e => e.stopPropagation()}>
-            <h2>Add Channel</h2>
+            <h2>{t('addChannel')}</h2>
             <form onSubmit={addChannel}>
               <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-                <button
-                  type="button"
-                  className={newChannelType === 'text' ? 'btn-primary' : 'btn-secondary'}
-                  onClick={() => setNewChannelType('text')}
-                >
+                <button type="button" className={newChannelType === 'text' ? 'btn-primary' : 'btn-secondary'} onClick={() => setNewChannelType('text')}>
                   # Text
                 </button>
-                <button
-                  type="button"
-                  className={newChannelType === 'voice' ? 'btn-primary' : 'btn-secondary'}
-                  onClick={() => setNewChannelType('voice')}
-                >
+                <button type="button" className={newChannelType === 'voice' ? 'btn-primary' : 'btn-secondary'} onClick={() => setNewChannelType('voice')}>
                   🔊 Voice
                 </button>
               </div>
-              <input
-                type="text"
-                placeholder="channel-name"
-                value={newChannelName}
-                onChange={e => setNewChannelName(e.target.value)}
-                autoFocus
-                maxLength={32}
-              />
+              <input type="text" placeholder={t('channelName')} value={newChannelName} onChange={e => setNewChannelName(e.target.value)} autoFocus maxLength={32} />
               <div className="modal-actions">
-                <button type="button" className="btn-secondary" onClick={() => setShowAddChannel(false)}>Cancel</button>
-                <button type="submit" className="btn-primary">Create</button>
+                <button type="button" className="btn-secondary" onClick={() => setShowAddChannel(false)}>{t('cancel')}</button>
+                <button type="submit" className="btn-primary">{t('create')}</button>
               </div>
             </form>
           </div>

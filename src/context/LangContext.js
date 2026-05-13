@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { t } from '../i18n';
+import { t, LANGUAGES } from '../i18n';
 import api from '../api';
 import { useAuth } from './AuthContext';
 
@@ -10,8 +10,9 @@ export function LangProvider({ children }) {
   const [lang, setLangState] = useState(() => localStorage.getItem('dl_lang') || 'en');
 
   useEffect(() => {
+    const langObj = LANGUAGES.find(l => l.code === lang) || LANGUAGES[0];
     document.documentElement.setAttribute('lang', lang);
-    document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+    document.documentElement.setAttribute('dir', langObj.dir);
     localStorage.setItem('dl_lang', lang);
   }, [lang]);
 
@@ -30,7 +31,7 @@ export function LangProvider({ children }) {
   const translate = (key) => t(key, lang);
 
   return (
-    <LangContext.Provider value={{ lang, setLang, t: translate }}>
+    <LangContext.Provider value={{ lang, setLang, t: translate, languages: LANGUAGES }}>
       {children}
     </LangContext.Provider>
   );

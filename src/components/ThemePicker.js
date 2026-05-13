@@ -16,7 +16,7 @@ const ACCENT_COLORS = [
 
 export default function ThemePicker({ onClose }) {
   const { theme, toggleTheme, accentColor, setAccentColor } = useTheme();
-  const { lang, setLang, t } = useLang();
+  const { lang, setLang, t, languages } = useLang();
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -30,16 +30,10 @@ export default function ThemePicker({ onClose }) {
         <div className="theme-section">
           <label className="theme-section-label">Mode</label>
           <div className="theme-mode-btns">
-            <button
-              className={`theme-mode-btn ${theme === 'dark' ? 'active' : ''}`}
-              onClick={() => theme !== 'dark' && toggleTheme()}
-            >
+            <button className={`theme-mode-btn ${theme === 'dark' ? 'active' : ''}`} onClick={() => theme !== 'dark' && toggleTheme()}>
               🌙 Dark
             </button>
-            <button
-              className={`theme-mode-btn ${theme === 'light' ? 'active' : ''}`}
-              onClick={() => theme !== 'light' && toggleTheme()}
-            >
+            <button className={`theme-mode-btn ${theme === 'light' ? 'active' : ''}`} onClick={() => theme !== 'light' && toggleTheme()}>
               ☀️ Light
             </button>
           </div>
@@ -60,24 +54,26 @@ export default function ThemePicker({ onClose }) {
               />
             ))}
           </div>
+          {/* Preview */}
+          <div className="accent-preview" style={{ background: accentColor }}>
+            {t('accentColor')}: {accentColor}
+          </div>
         </div>
 
         {/* Language */}
         <div className="theme-section">
           <label className="theme-section-label">{t('language')}</label>
-          <div className="theme-mode-btns">
-            <button
-              className={`theme-mode-btn ${lang === 'en' ? 'active' : ''}`}
-              onClick={() => setLang('en')}
-            >
-              🇬🇧 English
-            </button>
-            <button
-              className={`theme-mode-btn ${lang === 'ar' ? 'active' : ''}`}
-              onClick={() => setLang('ar')}
-            >
-              🇸🇦 العربية
-            </button>
+          <div className="lang-grid">
+            {languages.map(l => (
+              <button
+                key={l.code}
+                className={`lang-btn ${lang === l.code ? 'active' : ''}`}
+                onClick={() => setLang(l.code)}
+              >
+                <span className="lang-flag">{l.flag}</span>
+                <span className="lang-name">{l.name}</span>
+              </button>
+            ))}
           </div>
         </div>
       </div>
