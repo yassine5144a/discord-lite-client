@@ -1,0 +1,78 @@
+.xo-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001;
+}
+
+.xo-game {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  width: 320px;
+  box-shadow: var(--shadow);
+  animation: modalIn 0.2s ease;
+}
+
+.xo-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.xo-close {
+  background: none;
+  color: var(--text-muted);
+  font-size: 16px;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+}
+.xo-close:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+.xo-status {
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+  min-height: 20px;
+}
+
+.xo-board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.xo-cell {
+  aspect-ratio: 1;
+  background: var(--bg-tertiary);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 32px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, transform 0.1s;
+  cursor: default;
+}
+
+.xo-cell.X { color: var(--accent); }
+.xo-cell.O { color: var(--danger); }
+.xo-cell.hoverable { cursor: pointer; }
+.xo-cell.hoverable:hover { background: var(--bg-hover); transform: scale(1.05); }
+
+.xo-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}

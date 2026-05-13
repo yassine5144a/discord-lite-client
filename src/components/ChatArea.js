@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import api from '../api';
 import { useSocket } from '../context/SocketContext';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from './Toast';
+import EmojiPicker from './EmojiPicker';
 import './ChatArea.css';
 
 const SERVER_URL = process.env.REACT_APP_SERVER_URL || '';
@@ -21,6 +23,8 @@ export default function ChatArea({ server, channel }) {
   const [mentionList, setMentionList] = useState([]);
   const [showMentions, setShowMentions] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [showEmoji, setShowEmoji] = useState(false);
+  const { addToast } = useToast();
   const bottomRef = useRef(null);
   const typingTimer = useRef(null);
   const isTyping = useRef(false);
@@ -58,6 +62,10 @@ export default function ChatArea({ server, channel }) {
       if (channelId !== channel?._id) return;
       setMessages(prev => [message, ...prev]);
       setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
+      // Show toast notification if message is from someone else
+      if (message.author?._id !== user?._id) {
+        addToast(`${message.author?.username}: ${message.content?.slice(0, 50) || '📎 attachment'}`, 'message', 4000);
+      }
     };
 
     const onEdited = ({ channelId, messageId, content }) => {

@@ -1,0 +1,63 @@
+.theme-picker {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  width: 100%;
+  max-width: 380px;
+  box-shadow: var(--shadow);
+  animation: modalIn 0.2s ease;
+}
+
+.theme-picker-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.theme-picker-header h2 { font-size: 17px; font-weight: 700; }
+
+.theme-section { margin-bottom: 20px; }
+
+.theme-section-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+.theme-mode-btns { display: flex; gap: 8px; }
+
+.theme-mode-btn {
+  flex: 1;
+  padding: 10px;
+  background: var(--bg-tertiary);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.15s;
+}
+.theme-mode-btn:hover { border-color: var(--accent); color: var(--text-primary); }
+.theme-mode-btn.active { border-color: var(--accent); background: var(--accent-glow); color: var(--text-primary); }
+
+.accent-colors {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.accent-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  transition: transform 0.15s, border-color 0.15s;
+}
+.accent-btn:hover { transform: scale(1.15); }
+.accent-btn.active { border-color: var(--text-primary); transform: scale(1.15); }

@@ -209,3 +209,98 @@ a { text-decoration: none; color: inherit; }
 .status-idle { background: var(--warning); }
 .status-dnd { background: var(--danger); }
 .status-offline { background: var(--text-muted); }
+
+/* ── Animations ── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.animate-fade { animation: fadeIn 0.25s ease; }
+.animate-slide-left { animation: slideInLeft 0.25s ease; }
+.animate-slide-right { animation: slideInRight 0.25s ease; }
+.animate-scale { animation: scaleIn 0.2s ease; }
+
+/* Panel transitions */
+.mobile-panel.active { animation: fadeIn 0.2s ease; }
+.sidebar { animation: slideInLeft 0.2s ease; }
+.members-list { animation: slideInRight 0.2s ease; }
+
+/* Message animation */
+.message.with-header { animation: fadeIn 0.15s ease; }
+
+/* Button press effect */
+button:active:not(:disabled) { transform: scale(0.97); }
+
+/* ── Floating Action Buttons ── */
+.fab-container {
+  position: fixed;
+  bottom: 80px;
+  left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 500;
+}
+
+.fab {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow);
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: 1px solid var(--border);
+}
+
+.fab:hover { transform: scale(1.1); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+.fab-ai { background: var(--accent); color: white; }
+.fab-theme { background: var(--bg-secondary); color: var(--text-primary); }
+
+@media (min-width: 769px) {
+  .fab-container { bottom: 24px; }
+}
+
+/* ── RTL Support ── */
+[dir="rtl"] .sidebar { border-right: none; border-left: 1px solid var(--border-subtle); }
+[dir="rtl"] .server-bar { border-right: none; border-left: 1px solid var(--border-subtle); }
+[dir="rtl"] .members-list { border-left: none; border-right: 1px solid var(--border-subtle); }
+[dir="rtl"] .message { flex-direction: row-reverse; }
+[dir="rtl"] .message-body { text-align: right; }
+[dir="rtl"] .chat-input-form { flex-direction: row-reverse; }
+[dir="rtl"] .dm-item { flex-direction: row-reverse; }
+[dir="rtl"] .user-panel { flex-direction: row-reverse; }
+[dir="rtl"] .fab-container { left: auto; right: 16px; }
+
+/* ── Points & Badges ── */
+.points-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  background: rgba(240,178,50,0.15);
+  color: var(--role-owner);
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.badge-icon { font-size: 16px; }
