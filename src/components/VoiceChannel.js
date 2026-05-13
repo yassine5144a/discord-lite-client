@@ -22,17 +22,14 @@ const RTC_CONFIG = {
   iceServers: [
     { urls: 'stun:stun.l.google.com:19302' },
     { urls: 'stun:stun1.l.google.com:19302' },
-    { urls: 'stun:stun.cloudflare.com:3478' },
-    // Metered TURN servers
+    // Custom TURN server on Railway
     {
       urls: [
-        'turn:a.relay.metered.ca:80',
-        'turn:a.relay.metered.ca:80?transport=tcp',
-        'turn:a.relay.metered.ca:443',
-        'turn:a.relay.metered.ca:443?transport=tcp'
+        'turn:yamabiko.proxy.rlwy.net:51541',
+        'turn:yamabiko.proxy.rlwy.net:51541?transport=tcp'
       ],
-      username: 'openrelayproject',
-      credential: 'openrelayproject'
+      username: 'discordlite',
+      credential: 'pass123456'
     }
   ],
   iceCandidatePoolSize: 10,
