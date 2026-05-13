@@ -40,10 +40,19 @@ export default function Auth() {
 
   // Handle Google OAuth callback token
   useEffect(() => {
-    // HashRouter puts everything after # in the hash
-    // URL looks like: /#/auth/callback?token=xxx
-    const hash = window.location.hash; // e.g. "#/auth/callback?token=xxx"
+    const hash = window.location.hash;
     
+    // Check for google_token in hash query params (fallback)
+    if (hash.includes('google_token=')) {
+      const tokenMatch = hash.match(/google_token=([^&]+)/);
+      if (tokenMatch) {
+        localStorage.setItem('dl_token', tokenMatch[1]);
+        window.location.replace('/#/');
+        return;
+      }
+    }
+
+    // Check for token in /auth/callback
     if (hash.includes('/auth/callback')) {
       const queryString = hash.split('?')[1];
       if (queryString) {
@@ -51,7 +60,6 @@ export default function Auth() {
         const token = params.get('token');
         if (token) {
           localStorage.setItem('dl_token', token);
-          // Force reload to trigger AuthContext to fetch user
           window.location.replace('/#/');
           return;
         }
