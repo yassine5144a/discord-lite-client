@@ -10,6 +10,7 @@
   overflow: hidden;
   position: relative;
   padding: 16px;
+  perspective: 1500px;
 }
 
 /* Animated background */
@@ -37,12 +38,13 @@
   box-shadow: 0 20px 60px rgba(0,0,0,0.4);
   transform-style: preserve-3d;
   z-index: 1;
-  display: none; /* hidden by default, shown on desktop */
+  display: none;
+  flex-shrink: 0;
 }
 
 @media (min-width: 701px) {
-  .auth-container { display: block; }
-  .auth-mobile-card { display: none; }
+  .auth-container { display: block; width: 800px; }
+  .auth-mobile-card { display: none !important; }
 }
 
 /* All panels inside container */
