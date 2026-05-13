@@ -34,18 +34,14 @@ function AppContent() {
         <Route path="/" element={
           <PrivateRoute>
             <SocketProvider>
-              <ThemeProvider>
-                <LangProvider>
-                  <Home />
-                </LangProvider>
-              </ThemeProvider>
+              <Home />
             </SocketProvider>
           </PrivateRoute>
         } />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
 
-      {/* Floating action buttons */}
+      {/* Floating action buttons - only when logged in */}
       {user && (
         <div className="fab-container">
           <button className="fab fab-theme" onClick={() => setShowTheme(true)} title="Theme & Language" aria-label="Theme">🎨</button>
@@ -65,9 +61,13 @@ export default function App() {
   return (
     <HashRouter>
       <AuthProvider>
-        <ToastProvider>
-          <AppContent />
-        </ToastProvider>
+        <ThemeProvider>
+          <LangProvider>
+            <ToastProvider>
+              <AppContent />
+            </ToastProvider>
+          </LangProvider>
+        </ThemeProvider>
       </AuthProvider>
     </HashRouter>
   );
