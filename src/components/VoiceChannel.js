@@ -1,15 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  LiveKitRoom,
-  useParticipants,
-  useLocalParticipant,
-  useTracks,
-  AudioTrack,
-  RoomAudioRenderer
-} from '@livekit/components-react';
-import { Track } from 'livekit-client';
+import { LiveKitRoom, useParticipants, useLocalParticipant, RoomAudioRenderer } from '@livekit/components-react';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
+import { useLang } from '../context/LangContext';
 import './VoiceChannel.css';
 
 // Inner component - inside LiveKitRoom
@@ -64,7 +57,7 @@ function VoiceRoomInner({ onLeave, muted, deafened, speaking, setSpeaking }) {
         ))}
 
         {participants.filter(p => !p.isLocal).length === 0 && (
-          <p className="waiting-text">Waiting for others to join...</p>
+          <p className="waiting-text">{t('waitingForOthers')}</p>
         )}
       </div>
     </>
@@ -73,6 +66,7 @@ function VoiceRoomInner({ onLeave, muted, deafened, speaking, setSpeaking }) {
 
 export default function VoiceChannel({ server, channel }) {
   const { user } = useAuth();
+  const { t } = useLang();
   const [token, setToken] = useState(null);
   const [livekitUrl, setLivekitUrl] = useState(null);
   const [inCall, setInCall] = useState(false);
@@ -119,7 +113,7 @@ export default function VoiceChannel({ server, channel }) {
           <p>Join voice channel to talk</p>
           <p className="voice-hint">Powered by LiveKit — stable & low latency</p>
           {error && <p style={{ color: 'var(--danger)', fontSize: 13 }}>{error}</p>}
-          <button className="btn-join-voice" onClick={joinVoice}>Join Voice</button>
+          <button className="btn-join-voice" onClick={joinVoice}>{t('joinVoice')}</button>
         </div>
       ) : (
         <div className="voice-active">

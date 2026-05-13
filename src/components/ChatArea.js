@@ -3,6 +3,7 @@ import api from '../api';
 import { useSocket } from '../context/SocketContext';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from './Toast';
+import { useLang } from '../context/LangContext';
 import EmojiPicker from './EmojiPicker';
 import './ChatArea.css';
 
@@ -25,6 +26,7 @@ export default function ChatArea({ server, channel }) {
   const [uploading, setUploading] = useState(false);
   const [showEmoji, setShowEmoji] = useState(false);
   const { addToast } = useToast();
+  const { t } = useLang();
   const bottomRef = useRef(null);
   const typingTimer = useRef(null);
   const isTyping = useRef(false);
@@ -261,8 +263,8 @@ export default function ChatArea({ server, channel }) {
   const formatDate = (date) => {
     const d = new Date(date), today = new Date(), yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
-    if (d.toDateString() === today.toDateString()) return 'Today';
-    if (d.toDateString() === yesterday.toDateString()) return 'Yesterday';
+    if (d.toDateString() === today.toDateString()) return t('today');
+    if (d.toDateString() === yesterday.toDateString()) return t('yesterday');
     return d.toLocaleDateString();
   };
 
@@ -283,7 +285,7 @@ export default function ChatArea({ server, channel }) {
   if (!channel) {
     return (
       <div className="chat-area empty">
-        <div className="empty-state"><span>⚡</span><p>Select a channel to start chatting</p></div>
+        <div className="empty-state"><span>⚡</span><p>{t('selectChannel')}</p></div>
       </div>
     );
   }
@@ -311,7 +313,7 @@ export default function ChatArea({ server, channel }) {
       <div className="messages-container">
         {hasMore && (
           <button className="load-more-btn" onClick={loadMore} disabled={loadingMore}>
-            {loadingMore ? 'Loading...' : 'Load older messages'}
+            {loadingMore ? t('loading') : t('loadOlder')}
           </button>
         )}
 
@@ -334,7 +336,7 @@ export default function ChatArea({ server, channel }) {
                     <span className="message-time">{formatTime(msg.createdAt)}</span>
                   </div>
                 )}
-                <p className="message-content deleted-msg">🗑 Message deleted</p>
+                <p className="message-content deleted-msg">{t('messageDeleted')}</p>
               </div>
             </div>
           );
@@ -356,7 +358,7 @@ export default function ChatArea({ server, channel }) {
                   <div className="message-header">
                     <span className="message-author">{msg.author?.username}</span>
                     <span className="message-time">{formatTime(msg.createdAt)}</span>
-                    {msg.edited && <span className="edited-tag">(edited)</span>}
+                    {msg.edited && <span className="edited-tag">({t('edited')})</span>}
                   </div>
                 )}
 
@@ -473,7 +475,7 @@ export default function ChatArea({ server, channel }) {
           ref={inputRef}
           type="text"
           className="chat-input"
-          placeholder={`Message #${channel.name} — use @ to mention`}
+          placeholder={`${t('typeMessage')} #${channel.name}`}
           value={input}
           onChange={handleInputChange}
           onKeyDown={e => {

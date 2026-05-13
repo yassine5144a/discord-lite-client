@@ -1,19 +1,20 @@
 import React, { useState } from 'react';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
+import { useLang } from '../context/LangContext';
 import './MembersList.css';
 
 const SERVER_URL = process.env.REACT_APP_SERVER_URL || '';
 
 export default function MembersList({ server, onServerUpdated }) {
   const { user } = useAuth();
+  const { t } = useLang();
   const [contextMenu, setContextMenu] = useState(null);
 
   if (!server) return null;
 
   const myRole = server.members?.find(m => (m.user._id || m.user) === user?._id)?.role;
   const isAdmin = ['owner', 'admin'].includes(myRole);
-
   const online = server.members?.filter(m => m.user.status !== 'offline') || [];
   const offline = server.members?.filter(m => m.user.status === 'offline') || [];
 
@@ -26,7 +27,7 @@ export default function MembersList({ server, onServerUpdated }) {
   };
 
   const kickMember = async (memberId) => {
-    if (!window.confirm('Kick this member?')) return;
+    if (!window.confirm(t('kickMember') + '?')) return;
     try {
       const { data } = await api.delete(`/api/servers/${server._id}/members/${memberId}`);
       onServerUpdated?.(data);
@@ -42,18 +43,15 @@ export default function MembersList({ server, onServerUpdated }) {
     return (
       <div className="member-item" onContextMenu={canManage ? (e) => { e.preventDefault(); setContextMenu({ memberId, x: e.clientX, y: e.clientY }); } : undefined}>
         <div className="avatar" style={{ width: 32, height: 32, fontSize: 11 }}>
-          {member.user.avatar
-            ? <img src={`${SERVER_URL}${member.user.avatar}`} alt={member.user.username} />
-            : member.user.username?.slice(0, 2).toUpperCase()
-          }
+          {member.user.avatar ? <img src={`${SERVER_URL}${member.user.avatar}`} alt={member.user.username} /> : member.user.username?.slice(0, 2).toUpperCase()}
           <span className={`status-dot sm status-${member.user.status || 'offline'}`} />
         </div>
         <div className="member-info">
-          <span className="member-name">{member.user.username}{isMe ? ' (you)' : ''}</span>
+          <span className="member-name">{member.user.username}{isMe ? ` (${t('profile')})` : ''}</span>
           <span className={`role-badge ${member.role}`}>{member.role}</span>
         </div>
         {canManage && (
-          <button className="member-menu-btn" onClick={(e) => { e.stopPropagation(); setContextMenu({ memberId, x: e.clientX, y: e.clientY }); }} aria-label="Member options">⋯</button>
+          <button className="member-menu-btn" onClick={(e) => { e.stopPropagation(); setContextMenu({ memberId, x: e.clientX, y: e.clientY }); }} aria-label="options">⋯</button>
         )}
       </div>
     );
@@ -61,22 +59,22 @@ export default function MembersList({ server, onServerUpdated }) {
 
   return (
     <div className="members-list" onClick={() => setContextMenu(null)}>
-      <div className="members-header">Members</div>
-      {online.length > 0 && (<><div className="members-category">Online — {online.length}</div>{online.map(m => <MemberItem key={m.user._id} member={m} />)}</>)}
-      {offline.length > 0 && (<><div className="members-category">Offline — {offline.length}</div>{offline.map(m => <MemberItem key={m.user._id} member={m} />)}</>)}
+      <div className="members-header">{t('members')}</div>
+      {online.length > 0 && (<><div className="members-category">{t('online')} — {online.length}</div>{online.map(m => <MemberItem key={m.user._id} member={m} />)}</>)}
+      {offline.length > 0 && (<><div className="members-category">{t('offline')} — {offline.length}</div>{offline.map(m => <MemberItem key={m.user._id} member={m} />)}</>)}
 
       {contextMenu && (
         <div className="context-menu" style={{ top: contextMenu.y, left: Math.min(contextMenu.x, window.innerWidth - 180) }} onClick={e => e.stopPropagation()}>
           {myRole === 'owner' && (
             <>
               <div className="context-menu-label">Change Role</div>
-              <button onClick={() => changeRole(contextMenu.memberId, 'admin')}>Make Admin</button>
-              <button onClick={() => changeRole(contextMenu.memberId, 'moderator')}>Make Moderator</button>
-              <button onClick={() => changeRole(contextMenu.memberId, 'member')}>Make Member</button>
+              <button onClick={() => changeRole(contextMenu.memberId, 'admin')}>{t('makeAdmin')}</button>
+              <button onClick={() => changeRole(contextMenu.memberId, 'moderator')}>{t('makeModerator')}</button>
+              <button onClick={() => changeRole(contextMenu.memberId, 'member')}>{t('makeMember')}</button>
               <div className="context-menu-divider" />
             </>
           )}
-          <button className="danger" onClick={() => kickMember(contextMenu.memberId)}>Kick Member</button>
+          <button className="danger" onClick={() => kickMember(contextMenu.memberId)}>{t('kickMember')}</button>
         </div>
       )}
     </div>
