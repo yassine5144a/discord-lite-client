@@ -40,20 +40,34 @@ export default function Auth() {
 
   // Handle Google OAuth callback token
   useEffect(() => {
-    const hash = window.location.hash;
+    // HashRouter puts everything after # in the hash
+    // URL looks like: /#/auth/callback?token=xxx
+    const hash = window.location.hash; // e.g. "#/auth/callback?token=xxx"
+    
     if (hash.includes('/auth/callback')) {
-      const params = new URLSearchParams(hash.split('?')[1]);
-      const token = params.get('token');
-      if (token) {
-        localStorage.setItem('dl_token', token);
-        window.location.href = '/#/';
+      const queryString = hash.split('?')[1];
+      if (queryString) {
+        const params = new URLSearchParams(queryString);
+        const token = params.get('token');
+        if (token) {
+          localStorage.setItem('dl_token', token);
+          // Force reload to trigger AuthContext to fetch user
+          window.location.replace('/#/');
+          return;
+        }
       }
     }
+
     // Handle error
-    const searchParams = new URLSearchParams(location.search);
-    const error = searchParams.get('error');
-    if (error) setLoginError('Google login failed. Please try again.');
-  }, [location]);
+    if (hash.includes('error=')) {
+      const queryString = hash.split('?')[1];
+      if (queryString) {
+        const params = new URLSearchParams(queryString);
+        const error = params.get('error');
+        if (error) setLoginError('Google login failed. Please try again.');
+      }
+    }
+  }, []);
 
   const handleGoogleLogin = () => {
     window.location.href = `${SERVER_URL}/api/auth/google`;
