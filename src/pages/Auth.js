@@ -1,77 +1,162 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLang } from '../context/LangContext';
 import './Auth.css';
 
 export default function Auth() {
-  const [mode, setMode] = useState('login');
-  const [form, setForm] = useState({ username: '', email: '', password: '' });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [flipped, setFlipped] = useState(false);
+  const [animClass, setAnimClass] = useState('');
+  const [loginForm, setLoginForm] = useState({ email: '', password: '' });
+  const [registerForm, setRegisterForm] = useState({ username: '', email: '', password: '' });
+  const [loginError, setLoginError] = useState('');
+  const [registerError, setRegisterError] = useState('');
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [registerLoading, setRegisterLoading] = useState(false);
   const { login, register } = useAuth();
   const { t } = useLang();
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  const flip = (toRegister) => {
+    if (toRegister && !flipped) {
+      setAnimClass('active');
+      setFlipped(true);
+    } else if (!toRegister && flipped) {
+      setAnimClass('close');
+      setFlipped(false);
+    }
+  };
+
+  const handleLogin = async (e) => {
     e.preventDefault();
-    setError('');
-    setLoading(true);
+    setLoginError('');
+    setLoginLoading(true);
     try {
-      if (mode === 'login') await login(form.email, form.password);
-      else await register(form.username, form.email, form.password);
+      await login(loginForm.email, loginForm.password);
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.message || 'Something went wrong');
-    } finally { setLoading(false); }
+      setLoginError(err.response?.data?.message || 'Invalid credentials');
+    } finally { setLoginLoading(false); }
+  };
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    setRegisterError('');
+    setRegisterLoading(true);
+    try {
+      await register(registerForm.username, registerForm.email, registerForm.password);
+      navigate('/');
+    } catch (err) {
+      setRegisterError(err.response?.data?.message || 'Registration failed');
+    } finally { setRegisterLoading(false); }
   };
 
   return (
     <div className="auth-page">
-      {/* Animated background */}
-      <div className="auth-bg">
-        <div className="auth-orb orb-1" />
-        <div className="auth-orb orb-2" />
-        <div className="auth-orb orb-3" />
-      </div>
+      <div className={`auth-container ${animClass}`}>
 
-      <div className="auth-card">
-        <div className="auth-logo">
-          <div className="auth-logo-icon">⚡</div>
-          <span>Discord Lite</span>
+        {/* ── Login Panel (Left) ── */}
+        <div className="auth-login-panel">
+          <div className="auth-content">
+            <div className="auth-logo-wrap">
+              <div className="auth-logo-icon">⚡</div>
+              <span>Discord Lite</span>
+            </div>
+            <h1>{t('login')}</h1>
+            <form onSubmit={handleLogin}>
+              <input
+                type="email"
+                placeholder={t('email')}
+                value={loginForm.email}
+                onChange={e => setLoginForm({ ...loginForm, email: e.target.value })}
+                required
+                autoComplete="email"
+              />
+              <input
+                type="password"
+                placeholder={t('password')}
+                value={loginForm.password}
+                onChange={e => setLoginForm({ ...loginForm, password: e.target.value })}
+                required
+                minLength={6}
+                autoComplete="current-password"
+              />
+              {loginError && <div className="auth-error">{loginError}</div>}
+              <button type="submit" className="auth-btn-primary" disabled={loginLoading}>
+                {loginLoading ? <span className="auth-spinner" /> : t('login')}
+              </button>
+            </form>
+          </div>
         </div>
 
-        <h1>{mode === 'login' ? t('welcomeBack') : t('createAccount')}</h1>
+        {/* ── Flip Page Front (shows when not flipped) ── */}
+        <div className="auth-page-flip auth-page-front">
+          <div className="auth-flip-content auth-content">
+            <span className="auth-flip-icon">👋</span>
+            <h1>Hello, Friend!</h1>
+            <p>Enter your details and start your journey with us</p>
+            <button className="auth-btn-outline" onClick={() => flip(true)}>
+              {t('register')} →
+            </button>
+          </div>
+        </div>
 
-        <form onSubmit={handleSubmit} className="auth-form">
-          {mode === 'register' && (
-            <div className="form-group">
-              <label>{t('username')}</label>
-              <input type="text" placeholder="cooluser" value={form.username} onChange={e => setForm({ ...form, username: e.target.value })} required minLength={3} maxLength={32} autoComplete="username" />
+        {/* ── Flip Page Back (shows when flipped) ── */}
+        <div className="auth-page-flip auth-page-back">
+          <div className="auth-flip-content auth-content">
+            <span className="auth-flip-icon">🎉</span>
+            <h1>Welcome Back!</h1>
+            <p>To stay connected, please login with your personal info</p>
+            <button className="auth-btn-outline" onClick={() => flip(false)}>
+              ← {t('login')}
+            </button>
+          </div>
+        </div>
+
+        {/* ── Register Panel (Right) ── */}
+        <div className="auth-register-panel">
+          <div className="auth-content">
+            <div className="auth-logo-wrap">
+              <div className="auth-logo-icon">⚡</div>
+              <span>Discord Lite</span>
             </div>
-          )}
-          <div className="form-group">
-            <label>{t('email')}</label>
-            <input type="email" placeholder="you@example.com" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} required autoComplete="email" />
+            <h1>{t('register')}</h1>
+            <form onSubmit={handleRegister}>
+              <input
+                type="text"
+                placeholder={t('username')}
+                value={registerForm.username}
+                onChange={e => setRegisterForm({ ...registerForm, username: e.target.value })}
+                required
+                minLength={3}
+                maxLength={32}
+                autoComplete="username"
+              />
+              <input
+                type="email"
+                placeholder={t('email')}
+                value={registerForm.email}
+                onChange={e => setRegisterForm({ ...registerForm, email: e.target.value })}
+                required
+                autoComplete="email"
+              />
+              <input
+                type="password"
+                placeholder={t('password')}
+                value={registerForm.password}
+                onChange={e => setRegisterForm({ ...registerForm, password: e.target.value })}
+                required
+                minLength={6}
+                autoComplete="new-password"
+              />
+              {registerError && <div className="auth-error">{registerError}</div>}
+              <button type="submit" className="auth-btn-primary" disabled={registerLoading}>
+                {registerLoading ? <span className="auth-spinner" /> : t('register')}
+              </button>
+            </form>
           </div>
-          <div className="form-group">
-            <label>{t('password')}</label>
-            <input type="password" placeholder="••••••••" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} required minLength={6} autoComplete={mode === 'login' ? 'current-password' : 'new-password'} />
-          </div>
+        </div>
 
-          {error && <div className="auth-error">{error}</div>}
-
-          <button type="submit" className="auth-submit" disabled={loading}>
-            {loading ? <span className="auth-spinner" /> : mode === 'login' ? t('login') : t('register')}
-          </button>
-        </form>
-
-        <p className="auth-switch">
-          {mode === 'login' ? "Don't have an account? " : 'Already have an account? '}
-          <button className="auth-switch-btn" onClick={() => { setMode(mode === 'login' ? 'register' : 'login'); setError(''); }}>
-            {mode === 'login' ? t('register') : t('login')}
-          </button>
-        </p>
       </div>
     </div>
   );
