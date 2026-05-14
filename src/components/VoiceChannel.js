@@ -130,9 +130,23 @@ export default function VoiceChannel({ server, channel }) {
                 echoCancellation: true,
                 noiseSuppression: true,
                 autoGainControl: true,
-                sampleRate: 12000,
-                channelCount: 1
-              }
+                sampleRate: 16000,
+                channelCount: 1,
+                // Reduce latency
+                latency: 'interactive',
+              },
+              publishDefaults: {
+                audioPreset: {
+                  maxBitrate: 32000,  // 32kbps - balance quality/latency
+                },
+                dtx: true,           // Discontinuous transmission
+                red: false,          // No redundancy = less latency
+                simulcast: false,
+              },
+              adaptiveStream: false,
+              dynacast: false,
+              // Optimize for low latency
+              stopLocalTrackOnUnpublish: false,
             }}
           >
             <VoiceRoomInner

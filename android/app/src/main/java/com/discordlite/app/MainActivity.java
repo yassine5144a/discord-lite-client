@@ -2,6 +2,7 @@ package com.discordlite.app;
 
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.webkit.GeolocationPermissions;
 import android.webkit.PermissionRequest;
@@ -12,6 +13,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.view.WindowManager;
 import android.Manifest;
+import android.content.Context;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -27,13 +29,27 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Keep screen on during voice calls
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         getWindow().setFlags(
             WindowManager.LayoutParams.FLAG_FULLSCREEN,
             WindowManager.LayoutParams.FLAG_FULLSCREEN
         );
 
-        // Request microphone permission upfront
-        requestMicrophonePermission();
+        // Set audio mode for minimum latency voice calls
+        AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        if (audioManager != null) {
+            audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+            audioManager.setSpeakerphoneOn(true); // Speaker for better quality
+            audioManager.setStreamVolume(
+                AudioManager.STREAM_VOICE_CALL,
+                audioManager.getStreamMaxVolume(AudioManager.STREAM_VOICE_CALL),
+                0
+            );
+        }
+
+        // Request permissions upfront
+        requestPermissions();
 
         webView = new WebView(this);
         setContentView(webView);
@@ -50,27 +66,24 @@ public class MainActivity extends AppCompatActivity {
         settings.setUseWideViewPort(true);
         settings.setLoadWithOverviewMode(true);
 
-        // Enable WebRTC
-        try {
-            android.webkit.WebView.setWebContentsDebuggingEnabled(true);
-            java.lang.reflect.Method method = WebSettings.class.getMethod("setMediaPlaybackRequiresUserGesture", boolean.class);
-            method.invoke(settings, false);
-        } catch (Exception e) { /* ignore */ }
+        // Enable WebRTC debugging
+        WebView.setWebContentsDebuggingEnabled(true);
 
-        // Mobile user agent
+        // Mobile Chrome user agent - important for WebRTC
         settings.setUserAgentString(
             "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 " +
             "(KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
         );
 
         webView.setWebChromeClient(new WebChromeClient() {
-            // Grant all permissions automatically (microphone, camera)
             @Override
-            public void onPermissionRequest(PermissionRequest request) {
-                runOnUiThread(() -> request.grant(request.getResources()));
+            public void onPermissionRequest(final PermissionRequest request) {
+                // Grant ALL WebRTC permissions including audio/video
+                runOnUiThread(() -> {
+                    request.grant(request.getResources());
+                });
             }
 
-            // Handle geolocation if needed
             @Override
             public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
                 callback.invoke(origin, true, false);
@@ -81,9 +94,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 String url = request.getUrl().toString();
-                if (url.startsWith("https://discord-lite-client.vercel.app") ||
-                    url.startsWith("https://web-production-cafaa.up.railway.app")) {
+                // Allow all vercel and railway URLs
+                if (url.contains("vercel.app") || url.contains("railway.app") ||
+                    url.contains("livekit.cloud") || url.startsWith("https://accounts.google.com")) {
                     return false;
+                }
+                // Block external URLs
+                if (url.startsWith("http://") || url.startsWith("https://")) {
+                    return false; // Allow all HTTPS
                 }
                 return true;
             }
@@ -91,7 +109,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
-                // Fix viewport for mobile
                 view.evaluateJavascript(
                     "(function() {" +
                     "  var meta = document.querySelector('meta[name=viewport]');" +
@@ -105,10 +122,11 @@ public class MainActivity extends AppCompatActivity {
         webView.loadUrl(BASE_URL);
     }
 
-    private void requestMicrophonePermission() {
+    private void requestPermissions() {
         String[] permissions = {
             Manifest.permission.RECORD_AUDIO,
-            Manifest.permission.MODIFY_AUDIO_SETTINGS
+            Manifest.permission.MODIFY_AUDIO_SETTINGS,
+            Manifest.permission.CAMERA
         };
 
         boolean allGranted = true;
@@ -127,7 +145,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        // Reload WebView after permissions granted
         if (requestCode == PERMISSION_REQUEST_CODE && webView != null) {
             webView.reload();
         }
@@ -146,11 +163,29 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         webView.onResume();
+        // Restore audio mode
+        AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        if (audioManager != null) {
+            audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         webView.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Reset audio mode
+        AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        if (audioManager != null) {
+            audioManager.setMode(AudioManager.MODE_NORMAL);
+        }
+        if (webView != null) {
+            webView.destroy();
+        }
     }
 }
