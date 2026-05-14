@@ -87,6 +87,10 @@ export default function VoiceChannel({ server, channel }) {
       setToken(data.token);
       setLivekitUrl(data.url);
       setInCall(true);
+      // Start Android foreground service to keep call alive in background
+      if (window.AndroidVoice) {
+        window.AndroidVoice.startVoiceService();
+      }
     } catch (err) {
       setError('Failed to join voice: ' + (err.response?.data?.message || err.message));
     }
@@ -98,6 +102,10 @@ export default function VoiceChannel({ server, channel }) {
     setMuted(false);
     setDeafened(false);
     setSpeaking({});
+    // Stop Android foreground service when call ends
+    if (window.AndroidVoice) {
+      window.AndroidVoice.stopVoiceService();
+    }
   }, []);
 
   if (!channel) return null;
