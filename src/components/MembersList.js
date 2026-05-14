@@ -13,7 +13,9 @@ export default function MembersList({ server, onServerUpdated }) {
 
   if (!server) return null;
 
-  const myRole = server.members?.find(m => (m.user._id || m.user) === user?._id)?.role;
+  const myRole = server.members?.find(m =>
+    (m.user._id?.toString() || m.user?.toString()) === user?._id
+  )?.role;
   const isAdmin = ['owner', 'admin'].includes(myRole);
   const online = server.members?.filter(m => m.user.status !== 'offline') || [];
   const offline = server.members?.filter(m => m.user.status === 'offline') || [];
