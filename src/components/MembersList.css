@@ -1,102 +1,121 @@
 .members-list {
-  width: 240px;
+  width: 220px;
   background: var(--bg-secondary);
-  padding: 16px 8px;
+  border-left: 1px solid var(--border-subtle);
   overflow-y: auto;
   flex-shrink: 0;
+  position: relative;
+}
+
+.members-header {
+  padding: 16px 14px 8px;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .members-category {
-  font-size: 11px;
-  font-weight: 700;
+  font-size: 10px;
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.8px;
   color: var(--text-muted);
-  padding: 4px 8px;
-  margin-bottom: 4px;
+  padding: 12px 14px 4px;
 }
 
 .member-item {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 8px;
-  border-radius: 4px;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  margin: 1px 6px;
   cursor: pointer;
   transition: background 0.1s;
-}
-
-.member-item:hover { background: var(--bg-hover); }
-
-.member-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: var(--accent);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: 700;
   position: relative;
-  flex-shrink: 0;
 }
+.member-item:hover { background: var(--bg-hover); }
+.member-item:hover .member-menu-btn { opacity: 1; }
 
-.member-avatar img {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.status-dot {
-  position: absolute;
-  bottom: -1px;
-  right: -1px;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  border: 2px solid var(--bg-secondary);
-}
-
-.status-online { background: var(--success); }
-.status-idle { background: var(--warning); }
-.status-dnd { background: var(--danger); }
-.status-offline { background: var(--text-muted); }
-
-.member-info {
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
+.member-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 
 .member-name {
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  letter-spacing: -0.1px;
+}
+.member-item:hover .member-name { color: var(--text-primary); }
+
+.member-menu-btn {
+  background: none;
+  color: var(--text-muted);
+  font-size: 15px;
+  padding: 2px 5px;
+  border-radius: var(--radius-sm);
+  opacity: 0;
+  transition: opacity 0.15s, background 0.15s;
+  flex-shrink: 0;
+}
+.member-menu-btn:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+
+/* Context menu */
+.context-menu {
+  position: fixed;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 6px;
+  min-width: 170px;
+  z-index: 1000;
+  box-shadow: var(--shadow-lg);
+  animation: scaleIn 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+  overflow: hidden;
 }
 
-.member-role {
-  font-size: 11px;
-  color: var(--accent);
-  text-transform: capitalize;
+.context-menu::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--grad-aurora);
+  opacity: 0.6;
 }
 
-/* ── Mobile ── */
-@media (max-width: 768px) {
-  .members-list {
-    width: 100%;
-    height: 100%;
-    padding: 16px 12px;
-  }
+.context-menu-label {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  padding: 6px 10px 4px;
+}
 
-  .member-item {
-    padding: 10px 12px;
-  }
+.context-menu button {
+  display: block;
+  width: 100%;
+  padding: 8px 10px;
+  background: none;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+  border-radius: var(--radius-sm);
+  transition: background 0.1s;
+}
+.context-menu button:hover { background: var(--bg-hover); }
+.context-menu button.danger { color: var(--danger); }
+.context-menu button.danger:hover { background: rgba(239,68,68,0.1); }
 
-  .member-name {
-    font-size: 15px;
-  }
+.context-menu-divider { height: 1px; background: var(--border); margin: 4px 0; }
+
+/* Mobile */
+@media (max-width: 900px) {
+  .members-list { width: 100%; height: 100%; border-left: none; }
 }
