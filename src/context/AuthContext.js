@@ -6,7 +6,15 @@ import { subscribeToPush } from '../serviceWorkerRegistration';
 async function registerFCMToken() {
   try {
     if (!window.AndroidFCM) return;
-    const fcmToken = window.AndroidFCM.getFcmToken();
+
+    // Retry up to 5 times waiting for token to be ready
+    let fcmToken = '';
+    for (let i = 0; i < 5; i++) {
+      fcmToken = window.AndroidFCM.getFcmToken();
+      if (fcmToken) break;
+      await new Promise(r => setTimeout(r, 2000)); // wait 2s
+    }
+
     if (!fcmToken) return;
     const dlToken = localStorage.getItem('dl_token');
     if (!dlToken) return;
@@ -19,7 +27,7 @@ async function registerFCMToken() {
       },
       body: JSON.stringify({ token: fcmToken })
     });
-    console.log('✅ FCM token registered');
+    console.log('✅ FCM token registered:', fcmToken.slice(0, 20) + '...');
   } catch (err) {
     console.error('FCM token registration failed:', err);
   }
