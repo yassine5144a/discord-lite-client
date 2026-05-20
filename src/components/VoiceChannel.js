@@ -93,8 +93,6 @@ export default function VoiceChannel({ server, channel }) {
           noiseSuppression: true,
           autoGainControl: true,
           channelCount: 1,
-          // Low latency capture hint
-          latency: 'interactive',
         },
         publishDefaults: {
           audioPreset: { maxBitrate: 64000 },
@@ -165,8 +163,6 @@ export default function VoiceChannel({ server, channel }) {
         noiseSuppression: true,
         autoGainControl: true,
         channelCount: 1,
-        // Force lowest possible latency
-        latency: 'interactive',
         sampleRate: 48000,
         sampleSize: 16,
       });
