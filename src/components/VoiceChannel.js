@@ -1,114 +1,231 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { LiveKitRoom, useParticipants, useLocalParticipant, RoomAudioRenderer } from '@livekit/components-react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import {
+  Room,
+  RoomEvent,
+  Track,
+  createLocalAudioTrack,
+  ConnectionState,
+} from 'livekit-client';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
 import { useLang } from '../context/LangContext';
 import './VoiceChannel.css';
 
-// Inner component - inside LiveKitRoom
-function VoiceRoomInner({ onLeave, muted, deafened, speaking, setSpeaking }) {
-  const { user } = useAuth();
-  const { t } = useLang();
-  const participants = useParticipants();
-  const { localParticipant } = useLocalParticipant();
-
-  // Mute/unmute local mic
-  useEffect(() => {
-    if (localParticipant) {
-      localParticipant.setMicrophoneEnabled(!muted);
-    }
-  }, [muted, localParticipant]);
-
-  // Track speaking via audio levels
-  useEffect(() => {
-    if (!localParticipant) return;
-    const interval = setInterval(() => {
-      const level = localParticipant.audioLevel || 0;
-      setSpeaking(prev => ({ ...prev, self: level > 0.05 && !muted }));
-    }, 200);
-    return () => clearInterval(interval);
-  }, [localParticipant, muted, setSpeaking]);
-
-  return (
-    <>
-      {/* Render all remote audio */}
-      <RoomAudioRenderer muted={deafened} />
-
-      <div className="voice-participants">
-        {/* Self */}
-        <div className={`participant ${muted ? 'muted' : ''} ${speaking.self ? 'speaking' : ''}`}>
-          <div className="participant-avatar">
-            {localParticipant?.name?.slice(0, 2).toUpperCase() || '??'}
-            {muted && <span className="muted-icon">🔇</span>}
-          </div>
-          <span>{localParticipant?.name || 'You'} (you)</span>
-        </div>
-
-        {/* Remote participants */}
-        {participants.filter(p => !p.isLocal).map(participant => (
-          <div
-            key={participant.identity}
-            className={`participant ${speaking[participant.identity] ? 'speaking' : ''}`}
-          >
-            <div className="participant-avatar">
-              {participant.name?.slice(0, 2).toUpperCase() || '??'}
-            </div>
-            <span>{participant.name || participant.identity}</span>
-          </div>
-        ))}
-
-        {participants.filter(p => !p.isLocal).length === 0 && (
-          <p className="waiting-text">{t('waitingForOthers')}</p>
-        )}
-      </div>
-    </>
-  );
-}
-
 export default function VoiceChannel({ server, channel }) {
   const { user } = useAuth();
   const { t } = useLang();
-  const [token, setToken] = useState(null);
-  const [livekitUrl, setLivekitUrl] = useState(null);
+
+  const roomRef = useRef(null);
+  const audioTracksRef = useRef({}); // remoteIdentity -> <audio> element
+
   const [inCall, setInCall] = useState(false);
   const [muted, setMuted] = useState(false);
   const [deafened, setDeafened] = useState(false);
+  const [participants, setParticipants] = useState([]);
   const [speaking, setSpeaking] = useState({});
+  const [connectionState, setConnectionState] = useState('disconnected');
   const [error, setError] = useState(null);
 
+  // ─── Cleanup on unmount ───────────────────────────────────────────────────
+  useEffect(() => {
+    return () => {
+      if (roomRef.current) {
+        roomRef.current.disconnect();
+        roomRef.current = null;
+      }
+    };
+  }, []);
+
+  // ─── Attach remote audio track to a real <audio> element ─────────────────
+  const attachRemoteTrack = useCallback((track, participantIdentity) => {
+    // Remove old element if exists
+    if (audioTracksRef.current[participantIdentity]) {
+      audioTracksRef.current[participantIdentity].remove();
+    }
+    const audioEl = document.createElement('audio');
+    audioEl.autoplay = true;
+    audioEl.playsInline = true;
+    // Force play on Android WebView
+    audioEl.setAttribute('playsinline', '');
+    audioEl.setAttribute('webkit-playsinline', '');
+    document.body.appendChild(audioEl);
+    track.attach(audioEl);
+    // Force play (needed on some Android WebViews)
+    audioEl.play().catch(() => {});
+    audioTracksRef.current[participantIdentity] = audioEl;
+  }, []);
+
+  const detachRemoteTrack = useCallback((participantIdentity) => {
+    if (audioTracksRef.current[participantIdentity]) {
+      audioTracksRef.current[participantIdentity].remove();
+      delete audioTracksRef.current[participantIdentity];
+    }
+  }, []);
+
+  // ─── Join voice ───────────────────────────────────────────────────────────
   const joinVoice = async () => {
     try {
       setError(null);
+
+      // Step 1: Request mic permission explicitly BEFORE connecting
+      // This is critical for Android WebView
+      let micStream;
+      try {
+        micStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+        // Stop the test stream — LiveKit will create its own
+        micStream.getTracks().forEach(t => t.stop());
+      } catch (permErr) {
+        setError('Microphone permission denied. Please allow microphone access.');
+        return;
+      }
+
+      // Step 2: Get LiveKit token
       const roomName = `${server._id}-${channel._id}`;
       const { data } = await api.post('/api/livekit/token', {
         roomName,
-        participantName: user.username
+        participantName: user.username,
       });
-      setToken(data.token);
-      setLivekitUrl(data.url);
+
+      // Step 3: Create room with optimized audio settings
+      const room = new Room({
+        audioCaptureDefaults: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+          channelCount: 1,
+        },
+        publishDefaults: {
+          audioPreset: { maxBitrate: 64000 },
+          dtx: true,
+          red: true,
+          simulcast: false,
+        },
+        adaptiveStream: true,
+        dynacast: true,
+        stopLocalTrackOnUnpublish: false,
+        reconnectPolicy: {
+          maxRetries: 10,
+          nextRetryDelayInMs: () => 1000,
+        },
+      });
+
+      roomRef.current = room;
+
+      // ─── Room events ────────────────────────────────────────────────────
+      room.on(RoomEvent.ConnectionStateChanged, (state) => {
+        setConnectionState(state);
+      });
+
+      room.on(RoomEvent.ParticipantConnected, () => {
+        setParticipants([...room.remoteParticipants.values()]);
+      });
+
+      room.on(RoomEvent.ParticipantDisconnected, (participant) => {
+        detachRemoteTrack(participant.identity);
+        setParticipants([...room.remoteParticipants.values()]);
+      });
+
+      // Attach audio when a remote track is subscribed
+      room.on(RoomEvent.TrackSubscribed, (track, publication, participant) => {
+        if (track.kind === Track.Kind.Audio) {
+          attachRemoteTrack(track, participant.identity);
+        }
+        setParticipants([...room.remoteParticipants.values()]);
+      });
+
+      room.on(RoomEvent.TrackUnsubscribed, (track, publication, participant) => {
+        if (track.kind === Track.Kind.Audio) {
+          detachRemoteTrack(participant.identity);
+        }
+      });
+
+      // Speaking detection
+      room.on(RoomEvent.ActiveSpeakersChanged, (speakers) => {
+        const map = {};
+        speakers.forEach(p => { map[p.identity] = true; });
+        setSpeaking(map);
+      });
+
+      room.on(RoomEvent.Disconnected, () => {
+        leaveVoice();
+      });
+
+      // Step 4: Connect to LiveKit
+      await room.connect(data.url, data.token);
+
+      // Step 5: Create and publish local audio track explicitly
+      const audioTrack = await createLocalAudioTrack({
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true,
+        channelCount: 1,
+      });
+      await room.localParticipant.publishTrack(audioTrack);
+
+      setParticipants([...room.remoteParticipants.values()]);
       setInCall(true);
-      // Start Android foreground service to keep call alive in background
+
+      // Start Android foreground service
       if (window.AndroidVoice) {
         window.AndroidVoice.startVoiceService();
       }
+
     } catch (err) {
-      setError('Failed to join voice: ' + (err.response?.data?.message || err.message));
+      console.error('Voice join error:', err);
+      setError('Failed to join voice: ' + (err.message || String(err)));
+      if (roomRef.current) {
+        roomRef.current.disconnect();
+        roomRef.current = null;
+      }
     }
   };
 
+  // ─── Leave voice ──────────────────────────────────────────────────────────
   const leaveVoice = useCallback(() => {
+    if (roomRef.current) {
+      roomRef.current.disconnect();
+      roomRef.current = null;
+    }
+    // Remove all remote audio elements
+    Object.keys(audioTracksRef.current).forEach(id => {
+      audioTracksRef.current[id].remove();
+    });
+    audioTracksRef.current = {};
+
     setInCall(false);
-    setToken(null);
     setMuted(false);
     setDeafened(false);
+    setParticipants([]);
     setSpeaking({});
-    // Stop Android foreground service when call ends
+    setConnectionState('disconnected');
+
     if (window.AndroidVoice) {
       window.AndroidVoice.stopVoiceService();
     }
   }, []);
 
+  // ─── Mute/unmute ─────────────────────────────────────────────────────────
+  const toggleMute = useCallback(async () => {
+    if (!roomRef.current) return;
+    const newMuted = !muted;
+    setMuted(newMuted);
+    await roomRef.current.localParticipant.setMicrophoneEnabled(!newMuted);
+  }, [muted]);
+
+  // ─── Deafen/undeafen ─────────────────────────────────────────────────────
+  const toggleDeafen = useCallback(() => {
+    const newDeafened = !deafened;
+    setDeafened(newDeafened);
+    // Mute/unmute all remote audio elements
+    Object.values(audioTracksRef.current).forEach(el => {
+      el.muted = newDeafened;
+    });
+  }, [deafened]);
+
   if (!channel) return null;
+
+  const localName = user?.username || 'You';
+  const isSpeakingLocal = speaking[roomRef.current?.localParticipant?.identity] || false;
 
   return (
     <div className="voice-channel">
@@ -126,53 +243,45 @@ export default function VoiceChannel({ server, channel }) {
         </div>
       ) : (
         <div className="voice-active">
-          <LiveKitRoom
-            token={token}
-            serverUrl={livekitUrl}
-            connect={true}
-            audio={true}
-            video={false}
-            onDisconnected={leaveVoice}
-            options={{
-              audioCaptureDefaults: {
-                echoCancellation: true,
-                noiseSuppression: true,
-                autoGainControl: true,
-                sampleRate: 48000,   // Wideband — full quality
-                channelCount: 1,     // Mono is enough for voice
-                latency: 'interactive',
-              },
-              publishDefaults: {
-                audioPreset: {
-                  maxBitrate: 64000, // 64kbps — Discord baseline quality
-                },
-                dtx: true,          // Silence suppression (saves bandwidth)
-                red: true,           // Redundancy — reduces packet loss artifacts
-                simulcast: false,
-              },
-              adaptiveStream: true,  // Auto-adjust to network conditions
-              dynacast: true,        // Only send audio when needed
-              stopLocalTrackOnUnpublish: false,
-              // Reconnect automatically on network drop
-              reconnectPolicy: {
-                maxRetries: 10,
-                retryDelayMs: 1000,
-              },
-            }}
-          >
-            <VoiceRoomInner
-              onLeave={leaveVoice}
-              muted={muted}
-              deafened={deafened}
-              speaking={speaking}
-              setSpeaking={setSpeaking}
-            />
-          </LiveKitRoom>
+          {/* Connection status */}
+          {connectionState !== 'connected' && (
+            <p style={{ color: 'var(--warning)', fontSize: 12, textAlign: 'center' }}>
+              {connectionState === 'reconnecting' ? '🔄 Reconnecting...' : '⏳ Connecting...'}
+            </p>
+          )}
+
+          <div className="voice-participants">
+            {/* Local participant */}
+            <div className={`participant ${muted ? 'muted' : ''} ${isSpeakingLocal ? 'speaking' : ''}`}>
+              <div className="participant-avatar">
+                {localName.slice(0, 2).toUpperCase()}
+                {muted && <span className="muted-icon">🔇</span>}
+              </div>
+              <span>{localName} (you)</span>
+            </div>
+
+            {/* Remote participants */}
+            {participants.map(participant => (
+              <div
+                key={participant.identity}
+                className={`participant ${speaking[participant.identity] ? 'speaking' : ''}`}
+              >
+                <div className="participant-avatar">
+                  {(participant.name || participant.identity).slice(0, 2).toUpperCase()}
+                </div>
+                <span>{participant.name || participant.identity}</span>
+              </div>
+            ))}
+
+            {participants.length === 0 && (
+              <p className="waiting-text">{t('waitingForOthers')}</p>
+            )}
+          </div>
 
           <div className="voice-controls">
             <button
               className={`voice-btn ${muted ? 'active-danger' : ''}`}
-              onClick={() => setMuted(!muted)}
+              onClick={toggleMute}
               title={muted ? 'Unmute' : 'Mute'}
               aria-label={muted ? 'Unmute' : 'Mute'}
             >
@@ -180,7 +289,7 @@ export default function VoiceChannel({ server, channel }) {
             </button>
             <button
               className={`voice-btn ${deafened ? 'active-danger' : ''}`}
-              onClick={() => setDeafened(!deafened)}
+              onClick={toggleDeafen}
               title={deafened ? 'Undeafen' : 'Deafen'}
               aria-label={deafened ? 'Undeafen' : 'Deafen'}
             >
