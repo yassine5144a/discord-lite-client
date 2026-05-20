@@ -20,7 +20,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build"
   },
-  "proxy": "https://web-production-cafaa.up.railway.app",
+  "proxy": "https://ducky-chat.onrender.com",
   "browserslist": {
     "production": [
       ">0.2%",
