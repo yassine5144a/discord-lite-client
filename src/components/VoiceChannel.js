@@ -67,15 +67,28 @@ export default function VoiceChannel({ server, channel }) {
     try {
       setError(null);
 
-      // Step 1: Request mic permission explicitly BEFORE connecting
-      // This is critical for Android WebView
+      // Step 1: Set Android audio mode BEFORE getUserMedia
+      if (window.AndroidAudio) {
+        window.AndroidAudio.setCallMode();
+      }
+
+      // Step 2: Request mic permission explicitly BEFORE connecting
       let micStream;
       try {
-        micStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+        micStream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true,
+            channelCount: 1,
+          },
+          video: false
+        });
         // Stop the test stream — LiveKit will create its own
         micStream.getTracks().forEach(t => t.stop());
       } catch (permErr) {
         setError('Microphone permission denied. Please allow microphone access.');
+        if (window.AndroidAudio) window.AndroidAudio.setNormalMode();
         return;
       }
 
@@ -207,6 +220,9 @@ export default function VoiceChannel({ server, channel }) {
 
     if (window.AndroidVoice) {
       window.AndroidVoice.stopVoiceService();
+    }
+    if (window.AndroidAudio) {
+      window.AndroidAudio.setNormalMode();
     }
   }, []);
 
