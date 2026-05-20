@@ -1,7 +1,7 @@
 {
-  "name": "Discord Lite",
-  "short_name": "DiscordLite",
-  "description": "Discord-like app optimized for low data usage",
+  "name": "Ducky Chat",
+  "short_name": "DuckyChat",
+  "description": "Fast and lightweight chat app",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#1e1f22",

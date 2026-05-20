@@ -14,6 +14,8 @@ import android.webkit.WebViewClient;
 import android.view.WindowManager;
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
+import android.os.Build;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -21,7 +23,7 @@ import androidx.core.content.ContextCompat;
 public class MainActivity extends AppCompatActivity {
 
     private WebView webView;
-    private static final String BASE_URL = "https://discord-lite-client.vercel.app";
+    private static final String BASE_URL = "https://ducky-chat.vercel.app";
     private static final int PERMISSION_REQUEST_CODE = 100;
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -78,10 +80,7 @@ public class MainActivity extends AppCompatActivity {
         webView.setWebChromeClient(new WebChromeClient() {
             @Override
             public void onPermissionRequest(final PermissionRequest request) {
-                // Grant ALL WebRTC permissions including audio/video
-                runOnUiThread(() -> {
-                    request.grant(request.getResources());
-                });
+                runOnUiThread(() -> request.grant(request.getResources()));
             }
 
             @Override
@@ -89,6 +88,29 @@ public class MainActivity extends AppCompatActivity {
                 callback.invoke(origin, true, false);
             }
         });
+
+        // JavaScript interface to control foreground service
+        webView.addJavascriptInterface(new Object() {
+            @android.webkit.JavascriptInterface
+            public void startVoiceService() {
+                Intent intent = new Intent(MainActivity.this, VoiceCallService.class);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    startForegroundService(intent);
+                } else {
+                    startService(intent);
+                }
+            }
+
+            @android.webkit.JavascriptInterface
+            public void stopVoiceService() {
+                Intent intent = new Intent(MainActivity.this, VoiceCallService.class);
+                intent.setAction("STOP");
+                startService(intent);
+            }
+        }, "AndroidBridge");
+
+        // Register JavaScript bridge for voice service
+        webView.addJavascriptInterface(new VoiceBridge(this), "AndroidVoice");
 
         webView.setWebViewClient(new WebViewClient() {
             @Override
@@ -119,6 +141,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        webView.addJavascriptInterface(new VoiceBridge(this), "AndroidVoice");
         webView.loadUrl(BASE_URL);
     }
 
@@ -163,6 +186,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         webView.onResume();
+        webView.resumeTimers();
         // Restore audio mode
         AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         if (audioManager != null) {
@@ -173,16 +197,23 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        webView.onPause();
+        // Do NOT pause the WebView or its timers when a voice call is active,
+        // otherwise the LiveKit JS connection will be throttled and dropped.
+        if (!VoiceCallService.isRunning) {
+            webView.onPause();
+            webView.pauseTimers();
+        }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // Reset audio mode
-        AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-        if (audioManager != null) {
-            audioManager.setMode(AudioManager.MODE_NORMAL);
+        // Only reset audio mode if no call is active
+        if (!VoiceCallService.isRunning) {
+            AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+            if (audioManager != null) {
+                audioManager.setMode(AudioManager.MODE_NORMAL);
+            }
         }
         if (webView != null) {
             webView.destroy();
