@@ -93,16 +93,22 @@ export default function VoiceChannel({ server, channel }) {
           noiseSuppression: true,
           autoGainControl: true,
           channelCount: 1,
+          // Low latency capture hint
+          latency: 'interactive',
         },
         publishDefaults: {
           audioPreset: { maxBitrate: 64000 },
-          dtx: true,
-          red: true,
+          dtx: false,   // Disable DTX — causes audio gaps that feel like delay
+          red: false,   // Disable RED — adds buffering latency
           simulcast: false,
         },
-        adaptiveStream: true,
-        dynacast: true,
+        adaptiveStream: false, // Disable — adds jitter buffer delay
+        dynacast: false,       // Disable — adds processing delay
         stopLocalTrackOnUnpublish: false,
+        // Minimize jitter buffer
+        audio: {
+          jitterBufferTarget: 0, // Minimum buffering
+        },
         reconnectPolicy: {
           maxRetries: 10,
           nextRetryDelayInMs: () => 1000,
@@ -159,6 +165,10 @@ export default function VoiceChannel({ server, channel }) {
         noiseSuppression: true,
         autoGainControl: true,
         channelCount: 1,
+        // Force lowest possible latency
+        latency: 'interactive',
+        sampleRate: 48000,
+        sampleSize: 16,
       });
       await room.localParticipant.publishTrack(audioTrack);
 
