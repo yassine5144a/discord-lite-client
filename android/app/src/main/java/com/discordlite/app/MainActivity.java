@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.os.Bundle;
+import android.webkit.ConsoleMessage;
 import android.webkit.GeolocationPermissions;
 import android.webkit.PermissionRequest;
 import android.webkit.WebChromeClient;
@@ -16,12 +17,14 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.util.Log;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final String TAG = "DuckyChat";
     private WebView webView;
     private static final String BASE_URL = "https://ducky-chat.vercel.app";
     private static final int PERMISSION_REQUEST_CODE = 100;
@@ -38,8 +41,8 @@ public class MainActivity extends AppCompatActivity {
             WindowManager.LayoutParams.FLAG_FULLSCREEN
         );
 
-        // Request permissions upfront
-        requestPermissions();
+        // Request ALL permissions upfront including notifications
+        requestAllPermissions();
 
         webView = new WebView(this);
         setContentView(webView);
@@ -56,10 +59,10 @@ public class MainActivity extends AppCompatActivity {
         settings.setUseWideViewPort(true);
         settings.setLoadWithOverviewMode(true);
 
-        // Disable WebRTC debugging in production
-        WebView.setWebContentsDebuggingEnabled(false);
+        // Enable WebRTC debugging — needed for audio to work in WebView
+        WebView.setWebContentsDebuggingEnabled(true);
 
-        // Chrome Mobile user agent — required for WebRTC to work in WebView
+        // Latest Chrome Mobile user agent — critical for WebRTC/getUserMedia
         settings.setUserAgentString(
             "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 " +
             "(KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36"
@@ -68,7 +71,8 @@ public class MainActivity extends AppCompatActivity {
         webView.setWebChromeClient(new WebChromeClient() {
             @Override
             public void onPermissionRequest(final PermissionRequest request) {
-                // Auto-grant all WebRTC permissions (mic, camera, etc.)
+                Log.d(TAG, "WebRTC permission request: " + java.util.Arrays.toString(request.getResources()));
+                // MUST grant on UI thread
                 runOnUiThread(() -> request.grant(request.getResources()));
             }
 
@@ -76,19 +80,27 @@ public class MainActivity extends AppCompatActivity {
             public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
                 callback.invoke(origin, true, false);
             }
+
+            @Override
+            public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
+                Log.d(TAG, "JS: " + consoleMessage.message());
+                return true;
+            }
         });
 
-        // Single JS bridge for voice service control
+        // JS bridges
         webView.addJavascriptInterface(new VoiceBridge(this), "AndroidVoice");
-        // FCM token bridge
         webView.addJavascriptInterface(new FcmBridge(this), "AndroidFCM");
+        // Audio mode bridge — lets JS set audio mode before getUserMedia
+        webView.addJavascriptInterface(new AudioBridge(this), "AndroidAudio");
 
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 String url = request.getUrl().toString();
-                if (url.contains("vercel.app") || url.contains("railway.app") ||
-                    url.contains("livekit.cloud") || url.startsWith("https://accounts.google.com")) {
+                if (url.contains("vercel.app") || url.contains("onrender.com") ||
+                    url.contains("railway.app") || url.contains("livekit.cloud") ||
+                    url.startsWith("https://accounts.google.com")) {
                     return false;
                 }
                 if (url.startsWith("https://")) return false;
@@ -98,7 +110,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
-                // Fix viewport
                 view.evaluateJavascript(
                     "(function() {" +
                     "  var meta = document.querySelector('meta[name=viewport]');" +
@@ -112,12 +123,22 @@ public class MainActivity extends AppCompatActivity {
         webView.loadUrl(BASE_URL);
     }
 
-    private void requestPermissions() {
-        String[] permissions = {
-            Manifest.permission.RECORD_AUDIO,
-            Manifest.permission.MODIFY_AUDIO_SETTINGS,
-            Manifest.permission.CAMERA
-        };
+    private void requestAllPermissions() {
+        String[] permissions;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            permissions = new String[]{
+                Manifest.permission.RECORD_AUDIO,
+                Manifest.permission.MODIFY_AUDIO_SETTINGS,
+                Manifest.permission.CAMERA,
+                Manifest.permission.POST_NOTIFICATIONS
+            };
+        } else {
+            permissions = new String[]{
+                Manifest.permission.RECORD_AUDIO,
+                Manifest.permission.MODIFY_AUDIO_SETTINGS,
+                Manifest.permission.CAMERA
+            };
+        }
 
         boolean allGranted = true;
         for (String permission : permissions) {
@@ -136,7 +157,8 @@ public class MainActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == PERMISSION_REQUEST_CODE && webView != null) {
-            webView.reload();
+            // Don't reload — just log
+            Log.d(TAG, "Permissions result received");
         }
     }
 
@@ -145,21 +167,7 @@ public class MainActivity extends AppCompatActivity {
         if (webView.canGoBack()) {
             webView.goBack();
         } else {
-            // Move to background instead of closing — keeps call alive
             moveTaskToBack(true);
-        }
-    }
-
-    private void setAudioForCall() {
-        AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-        if (am != null) {
-            am.setMode(AudioManager.MODE_IN_COMMUNICATION);
-            am.setSpeakerphoneOn(true);
-            am.setStreamVolume(
-                AudioManager.STREAM_VOICE_CALL,
-                am.getStreamMaxVolume(AudioManager.STREAM_VOICE_CALL),
-                0
-            );
         }
     }
 
@@ -168,13 +176,19 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         webView.onResume();
         webView.resumeTimers();
-        setAudioForCall();
+        // Only restore audio mode if call is active
+        if (VoiceCallService.isRunning) {
+            AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+            if (am != null) {
+                am.setMode(AudioManager.MODE_IN_COMMUNICATION);
+                am.setSpeakerphoneOn(true);
+            }
+        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        // Keep WebView alive when a call is active — pausing it kills LiveKit
         if (!VoiceCallService.isRunning) {
             webView.onPause();
             webView.pauseTimers();
