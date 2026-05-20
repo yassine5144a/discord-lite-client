@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
@@ -8,8 +8,6 @@ import { ToastProvider } from './components/Toast';
 import Auth from './pages/Auth';
 import Home from './pages/Home';
 import InstallPrompt from './components/InstallPrompt';
-import AIChat from './components/AIChat';
-import ThemePicker from './components/ThemePicker';
 
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth();
@@ -24,8 +22,6 @@ function PrivateRoute({ children }) {
 
 function AppContent() {
   const { user } = useAuth();
-  const [showAI, setShowAI] = useState(false);
-  const [showTheme, setShowTheme] = useState(false);
 
   return (
     <>
@@ -40,17 +36,6 @@ function AppContent() {
         } />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-
-      {/* Floating action buttons - only when logged in */}
-      {user && (
-        <div className="fab-container">
-          <button className="fab fab-theme" onClick={() => setShowTheme(true)} title="Theme & Language" aria-label="Theme">🎨</button>
-          <button className="fab fab-ai" onClick={() => setShowAI(true)} title="AI Assistant" aria-label="AI">🤖</button>
-        </div>
-      )}
-
-      {showAI && <AIChat onClose={() => setShowAI(false)} />}
-      {showTheme && <ThemePicker onClose={() => setShowTheme(false)} />}
 
       <InstallPrompt />
     </>
