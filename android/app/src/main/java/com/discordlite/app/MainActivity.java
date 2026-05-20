@@ -31,24 +31,12 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Keep screen on during voice calls
+        // Keep screen on
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         getWindow().setFlags(
             WindowManager.LayoutParams.FLAG_FULLSCREEN,
             WindowManager.LayoutParams.FLAG_FULLSCREEN
         );
-
-        // Set audio mode for minimum latency voice calls
-        AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-        if (audioManager != null) {
-            audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
-            audioManager.setSpeakerphoneOn(true); // Speaker for better quality
-            audioManager.setStreamVolume(
-                AudioManager.STREAM_VOICE_CALL,
-                audioManager.getStreamMaxVolume(AudioManager.STREAM_VOICE_CALL),
-                0
-            );
-        }
 
         // Request permissions upfront
         requestPermissions();
@@ -68,18 +56,19 @@ public class MainActivity extends AppCompatActivity {
         settings.setUseWideViewPort(true);
         settings.setLoadWithOverviewMode(true);
 
-        // Enable WebRTC debugging
-        WebView.setWebContentsDebuggingEnabled(true);
+        // Disable WebRTC debugging in production
+        WebView.setWebContentsDebuggingEnabled(false);
 
-        // Mobile Chrome user agent - important for WebRTC
+        // Chrome Mobile user agent — required for WebRTC to work in WebView
         settings.setUserAgentString(
             "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 " +
-            "(KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
+            "(KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36"
         );
 
         webView.setWebChromeClient(new WebChromeClient() {
             @Override
             public void onPermissionRequest(final PermissionRequest request) {
+                // Auto-grant all WebRTC permissions (mic, camera, etc.)
                 runOnUiThread(() -> request.grant(request.getResources()));
             }
 
@@ -89,48 +78,25 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // JavaScript interface to control foreground service
-        webView.addJavascriptInterface(new Object() {
-            @android.webkit.JavascriptInterface
-            public void startVoiceService() {
-                Intent intent = new Intent(MainActivity.this, VoiceCallService.class);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    startForegroundService(intent);
-                } else {
-                    startService(intent);
-                }
-            }
-
-            @android.webkit.JavascriptInterface
-            public void stopVoiceService() {
-                Intent intent = new Intent(MainActivity.this, VoiceCallService.class);
-                intent.setAction("STOP");
-                startService(intent);
-            }
-        }, "AndroidBridge");
-
-        // Register JavaScript bridge for voice service
+        // Single JS bridge for voice service control
         webView.addJavascriptInterface(new VoiceBridge(this), "AndroidVoice");
 
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 String url = request.getUrl().toString();
-                // Allow all vercel and railway URLs
                 if (url.contains("vercel.app") || url.contains("railway.app") ||
                     url.contains("livekit.cloud") || url.startsWith("https://accounts.google.com")) {
                     return false;
                 }
-                // Block external URLs
-                if (url.startsWith("http://") || url.startsWith("https://")) {
-                    return false; // Allow all HTTPS
-                }
+                if (url.startsWith("https://")) return false;
                 return true;
             }
 
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
+                // Fix viewport
                 view.evaluateJavascript(
                     "(function() {" +
                     "  var meta = document.querySelector('meta[name=viewport]');" +
@@ -141,7 +107,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        webView.addJavascriptInterface(new VoiceBridge(this), "AndroidVoice");
         webView.loadUrl(BASE_URL);
     }
 
@@ -178,7 +143,21 @@ public class MainActivity extends AppCompatActivity {
         if (webView.canGoBack()) {
             webView.goBack();
         } else {
-            super.onBackPressed();
+            // Move to background instead of closing — keeps call alive
+            moveTaskToBack(true);
+        }
+    }
+
+    private void setAudioForCall() {
+        AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        if (am != null) {
+            am.setMode(AudioManager.MODE_IN_COMMUNICATION);
+            am.setSpeakerphoneOn(true);
+            am.setStreamVolume(
+                AudioManager.STREAM_VOICE_CALL,
+                am.getStreamMaxVolume(AudioManager.STREAM_VOICE_CALL),
+                0
+            );
         }
     }
 
@@ -187,18 +166,13 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         webView.onResume();
         webView.resumeTimers();
-        // Restore audio mode
-        AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-        if (audioManager != null) {
-            audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
-        }
+        setAudioForCall();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        // Do NOT pause the WebView or its timers when a voice call is active,
-        // otherwise the LiveKit JS connection will be throttled and dropped.
+        // Keep WebView alive when a call is active — pausing it kills LiveKit
         if (!VoiceCallService.isRunning) {
             webView.onPause();
             webView.pauseTimers();
@@ -208,12 +182,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // Only reset audio mode if no call is active
         if (!VoiceCallService.isRunning) {
-            AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-            if (audioManager != null) {
-                audioManager.setMode(AudioManager.MODE_NORMAL);
-            }
+            AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+            if (am != null) am.setMode(AudioManager.MODE_NORMAL);
         }
         if (webView != null) {
             webView.destroy();
