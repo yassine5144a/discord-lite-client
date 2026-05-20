@@ -138,23 +138,26 @@ export default function VoiceChannel({ server, channel }) {
                 echoCancellation: true,
                 noiseSuppression: true,
                 autoGainControl: true,
-                sampleRate: 16000,
-                channelCount: 1,
-                // Reduce latency
+                sampleRate: 48000,   // Wideband — full quality
+                channelCount: 1,     // Mono is enough for voice
                 latency: 'interactive',
               },
               publishDefaults: {
                 audioPreset: {
-                  maxBitrate: 32000,  // 32kbps - balance quality/latency
+                  maxBitrate: 64000, // 64kbps — Discord baseline quality
                 },
-                dtx: true,           // Discontinuous transmission
-                red: false,          // No redundancy = less latency
+                dtx: true,          // Silence suppression (saves bandwidth)
+                red: true,           // Redundancy — reduces packet loss artifacts
                 simulcast: false,
               },
-              adaptiveStream: false,
-              dynacast: false,
-              // Optimize for low latency
+              adaptiveStream: true,  // Auto-adjust to network conditions
+              dynacast: true,        // Only send audio when needed
               stopLocalTrackOnUnpublish: false,
+              // Reconnect automatically on network drop
+              reconnectPolicy: {
+                maxRetries: 10,
+                retryDelayMs: 1000,
+              },
             }}
           >
             <VoiceRoomInner
