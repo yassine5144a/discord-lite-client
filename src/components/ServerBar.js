@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import api, { getAvatarUrl } from '../api';
-import { useTheme } from '../context/ThemeContext';
 import { useLang } from '../context/LangContext';
 import './ServerBar.css';
 
@@ -12,7 +11,6 @@ export default function ServerBar({ servers, activeServerId, onSelectServer, onS
   const [name, setName] = useState('');
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
-  const { theme, toggleTheme } = useTheme();
   const { t } = useLang();
 
   const createServer = async (e) => {
@@ -62,11 +60,6 @@ export default function ServerBar({ servers, activeServerId, onSelectServer, onS
 
       <button className="server-icon add-icon" onClick={() => { setShowCreate(true); setShowJoin(false); }} title={t('createServer')} aria-label={t('createServer')}>+</button>
       <button className="server-icon join-icon" onClick={() => { setShowJoin(true); setShowCreate(false); }} title={t('joinServer')} aria-label={t('joinServer')}>🔗</button>
-
-      <div className="server-divider" />
-      <button className="server-icon theme-icon" onClick={toggleTheme} title={t('theme')} aria-label={t('theme')}>
-        {theme === 'dark' ? '☀️' : '🌙'}
-      </button>
 
       {showCreate && (
         <div className="modal-overlay" onClick={() => setShowCreate(false)}>

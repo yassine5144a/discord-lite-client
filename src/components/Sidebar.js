@@ -2,14 +2,20 @@ import React, { useState } from 'react';
 import api, { getAvatarUrl } from '../api';
 import { useAuth } from '../context/AuthContext';
 import { useLang } from '../context/LangContext';
+import { useTheme } from '../context/ThemeContext';
+import AIChat from './AIChat';
+import ThemePicker from './ThemePicker';
 import './Sidebar.css';
 
 export default function Sidebar({ server, activeChannelId, onSelectChannel, onServerUpdated, onOpenSettings, onOpenProfile }) {
   const { user, logout } = useAuth();
   const { t } = useLang();
+  const { theme, toggleTheme } = useTheme();
   const [showAddChannel, setShowAddChannel] = useState(false);
   const [newChannelName, setNewChannelName] = useState('');
   const [newChannelType, setNewChannelType] = useState('text');
+  const [showAI, setShowAI] = useState(false);
+  const [showTheme, setShowTheme] = useState(false);
 
   const isAdmin = server?.members?.some(
     m => m.user._id === user?._id && ['owner', 'admin'].includes(m.role)
@@ -87,9 +93,24 @@ export default function Sidebar({ server, activeChannelId, onSelectChannel, onSe
           <span className="user-name">{user?.username}</span>
           <span className="user-status">{t(user?.status || 'offline')}</span>
         </div>
+        {/* AI Assistant */}
+        <button className="user-panel-btn ai-btn" onClick={() => setShowAI(true)} title="AI Assistant" aria-label="AI Assistant">🤖</button>
+        {/* Theme */}
+        <button className="user-panel-btn theme-btn" onClick={() => setShowTheme(true)} title={t('theme')} aria-label={t('theme')}>
+          {theme === 'dark' ? '☀️' : '🌙'}
+        </button>
+        <button className="settings-btn" onClick={onOpenProfile} title={t('profile')} aria-label={t('profile')}>⚙️</button>
         <button className="logout-btn" onClick={logout} title={t('logout')} aria-label={t('logout')}>⏻</button>
-        <button className="settings-btn" onClick={onOpenProfile} title={t('profile')} aria-label={t('profile')} style={{marginLeft: 2}}>⚙️</button>
       </div>
+
+      {showAI && <AIChat onClose={() => setShowAI(false)} />}
+      {showTheme && (
+        <div className="modal-overlay" onClick={() => setShowTheme(false)}>
+          <div onClick={e => e.stopPropagation()}>
+            <ThemePicker onClose={() => setShowTheme(false)} />
+          </div>
+        </div>
+      )}
 
       {showAddChannel && (
         <div className="modal-overlay" onClick={() => setShowAddChannel(false)}>
