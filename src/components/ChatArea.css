@@ -1,3 +1,6 @@
+/* ══════════════════════════════════════════
+   CHAT AREA
+══════════════════════════════════════════ */
 .chat-area {
   flex: 1;
   display: flex;
@@ -12,7 +15,7 @@
 .empty-state span { font-size: 52px; display: block; margin-bottom: 12px; }
 .empty-state p { font-size: 15px; font-weight: 600; }
 
-/* Header */
+/* ── Header ── */
 .chat-header {
   padding: 0 16px;
   height: 54px;
@@ -22,6 +25,7 @@
   border-bottom: 1px solid var(--border-subtle);
   flex-shrink: 0;
   background: var(--bg-secondary);
+  box-shadow: 0 1px 0 var(--border-subtle);
 }
 
 .chat-channel-name {
@@ -41,12 +45,12 @@
   font-size: 16px;
   padding: 6px 7px;
   border-radius: var(--radius-sm);
-  transition: color 0.15s, background 0.15s;
+  transition: color 0.2s ease, background 0.2s ease;
 }
 .chat-action-btn:hover { color: var(--text-primary); background: var(--bg-hover); }
 .chat-action-btn.active { color: var(--accent); }
 
-/* Summary panel */
+/* ── Summary panel ── */
 .summary-panel {
   background: var(--bg-secondary);
   border-bottom: 1px solid var(--border-subtle);
@@ -67,7 +71,7 @@
 .summary-header button { background: none; color: var(--text-muted); font-size: 13px; padding: 2px 6px; border-radius: var(--radius-sm); }
 .summary-panel p { font-size: 13px; color: var(--text-secondary); line-height: 1.6; white-space: pre-wrap; }
 
-/* Pinned panel */
+/* ── Pinned panel ── */
 .pinned-panel {
   background: var(--bg-secondary);
   border-bottom: 1px solid var(--border-subtle);
@@ -95,7 +99,7 @@
 .pinned-author { font-size: 11px; font-weight: 700; color: var(--accent); flex-shrink: 0; }
 .pinned-content { font-size: 12px; color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-/* Messages */
+/* ── Messages container ── */
 .messages-container {
   flex: 1;
   overflow-y: auto;
@@ -113,10 +117,11 @@
   border-radius: 20px;
   font-size: 12px;
   border: 1px solid var(--border);
-  transition: all 0.15s;
+  transition: all 0.2s ease;
 }
 .load-more-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
 
+/* ── Date divider ── */
 .date-divider {
   display: flex;
   align-items: center;
@@ -135,18 +140,19 @@
   background: var(--border-subtle);
 }
 
-/* Message */
+/* ── Message row ── */
 .message {
   display: flex;
   align-items: flex-start;
   padding: 2px 16px;
   gap: 12px;
-  transition: background 0.1s;
+  transition: background 0.15s ease;
   position: relative;
 }
-.message:hover { background: rgba(255,255,255,0.015); }
+.message:hover { background: rgba(255,255,255,0.02); }
 .message.with-header { margin-top: 14px; }
 
+/* ── Avatar ── */
 .message-avatar {
   width: 36px;
   height: 36px;
@@ -161,6 +167,7 @@
   margin-top: 2px;
   overflow: hidden;
   color: white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 .message-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
 
@@ -171,7 +178,7 @@
   flex-shrink: 0;
   text-align: right;
   padding-top: 4px;
-  transition: color 0.1s;
+  transition: color 0.15s ease;
 }
 .message:hover .message-time-stub { color: var(--text-muted); }
 
@@ -197,28 +204,37 @@
   white-space: pre-wrap;
 }
 
-/* Own message bubble */
-.own-message { flex-direction: row-reverse; }
-.own-message .message-header { flex-direction: row-reverse; }
-.own-message .message-body { align-items: flex-end; }
+/* ── Own message — right-aligned gradient bubble ── */
+.own-message {
+  flex-direction: row-reverse;
+}
+.own-message .message-header {
+  flex-direction: row-reverse;
+}
+.own-message .message-body {
+  align-items: flex-end;
+  display: flex;
+  flex-direction: column;
+}
 .own-message .message-content {
   background: var(--grad-main);
   color: white;
   padding: 9px 14px;
-  border-radius: 16px 16px 4px 16px;
+  border-radius: 18px 18px 4px 18px;
   display: inline-block;
   max-width: 75%;
   box-shadow: 0 4px 16px var(--accent-glow);
+  line-height: 1.5;
 }
 
-/* Deleted */
+/* ── Deleted ── */
 .deleted-msg { color: var(--text-muted) !important; font-style: italic; font-size: 13px !important; }
 .deleted-avatar { width: 36px; height: 36px; flex-shrink: 0; }
 
-/* Pinned */
+/* ── Pinned ── */
 .message.pinned { background: rgba(124,58,237,0.04); border-left: 2px solid var(--accent); }
 
-/* Reply */
+/* ── Reply preview ── */
 .reply-preview {
   display: flex;
   gap: 6px;
@@ -250,7 +266,7 @@
 .reply-bar button { background: none; color: var(--text-muted); font-size: 14px; padding: 2px 6px; border-radius: var(--radius-sm); }
 .reply-bar button:hover { color: var(--danger); }
 
-/* Translation */
+/* ── Translation ── */
 .message-translation {
   font-size: 12px;
   color: var(--text-secondary);
@@ -263,7 +279,7 @@
   display: inline-block;
 }
 
-/* Data saver */
+/* ── Data saver ── */
 .data-saver-hidden {
   font-size: 11px;
   color: var(--text-muted);
@@ -275,7 +291,7 @@
   display: inline-block;
 }
 
-/* Attachments */
+/* ── Attachments ── */
 .attachment { margin-top: 6px; }
 .attachment-image {
   max-width: 300px;
@@ -284,7 +300,7 @@
   cursor: pointer;
   display: block;
   object-fit: cover;
-  transition: opacity 0.15s, transform 0.15s;
+  transition: opacity 0.2s ease, transform 0.2s ease;
   border: 1px solid var(--border-subtle);
 }
 .attachment-image:hover { opacity: 0.9; transform: scale(1.01); }
@@ -300,7 +316,7 @@
   border: 1px solid var(--border);
 }
 
-/* Message actions */
+/* ── Message actions toolbar ── */
 .message-actions {
   position: absolute;
   right: 8px;
@@ -314,6 +330,7 @@
   padding: 3px;
   box-shadow: var(--shadow);
   animation: scaleIn 0.15s ease;
+  z-index: 5;
 }
 .message:hover .message-actions { display: flex; }
 
@@ -323,12 +340,12 @@
   padding: 4px 6px;
   border-radius: var(--radius-sm);
   color: var(--text-secondary);
-  transition: background 0.1s, color 0.1s;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 .msg-action-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
 .msg-action-btn.danger:hover { background: rgba(239,68,68,0.1); color: var(--danger); }
 
-/* Edit form */
+/* ── Edit form ── */
 .edit-form { display: flex; flex-direction: column; gap: 4px; }
 .edit-form input {
   padding: 8px 12px;
@@ -345,7 +362,7 @@
 .edit-cancel { padding: 4px 12px; background: none; color: var(--text-muted); border-radius: var(--radius-sm); font-size: 12px; }
 .edit-cancel:hover { text-decoration: underline; }
 
-/* @mention */
+/* ── @mention ── */
 .mention    { color: var(--accent); font-weight: 700; background: var(--accent-soft); border-radius: 4px; padding: 0 4px; }
 .mention-me { background: rgba(124,58,237,0.2); }
 
@@ -374,7 +391,7 @@
   color: var(--text-primary);
   font-size: 13px;
   text-align: left;
-  transition: background 0.1s;
+  transition: background 0.15s ease;
 }
 .mention-item:hover { background: var(--bg-hover); }
 .mention-avatar {
@@ -393,7 +410,7 @@
 }
 .mention-avatar img { width: 100%; height: 100%; object-fit: cover; }
 
-/* Typing */
+/* ── Typing indicator ── */
 .typing-indicator {
   height: 22px;
   padding: 0 16px;
@@ -413,19 +430,21 @@
 .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
 .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
 
-/* Input */
+/* ══════════════════════════════════════════
+   INPUT BAR — pill shape with gradient send
+══════════════════════════════════════════ */
 .chat-input-form {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 0 12px 14px;
+  gap: 8px;
+  padding: 8px 12px 14px;
   flex-shrink: 0;
 }
 
 .attach-btn {
   width: 36px;
   height: 36px;
-  border-radius: var(--radius-sm);
+  border-radius: 50%;
   background: none;
   color: var(--text-muted);
   font-size: 17px;
@@ -433,48 +452,56 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: color 0.15s, background 0.15s;
+  transition: color 0.2s ease, background 0.2s ease, transform 0.2s ease;
 }
-.attach-btn:hover { color: var(--text-primary); background: var(--bg-hover); }
+.attach-btn:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+  transform: scale(1.1);
+}
 
+/* Pill-shaped input */
 .chat-input {
   flex: 1;
-  padding: 11px 16px;
+  padding: 11px 18px;
   background: var(--bg-secondary);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: 24px;
   color: var(--text-primary);
   font-size: 14px;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 .chat-input:focus {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-glow);
+  background: var(--bg-hover);
 }
 .chat-input::placeholder { color: var(--text-muted); }
 
+/* Gradient send button */
 .send-btn {
   width: 38px;
   height: 38px;
-  border-radius: var(--radius);
+  border-radius: 50%;
   background: var(--grad-main);
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
   box-shadow: 0 4px 16px var(--accent-glow);
 }
 .send-btn:hover:not(:disabled) {
-  transform: scale(1.08) translateY(-1px);
+  transform: scale(1.12) translateY(-1px);
   box-shadow: 0 8px 24px var(--accent-glow);
 }
-.send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.send-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
-/* Mobile */
+/* ── Mobile ── */
 @media (max-width: 900px) {
   .chat-input { font-size: 16px; }
   .message-content { font-size: 15px; }
   .message { padding: 2px 12px; }
+  .own-message .message-content { max-width: 85%; }
 }

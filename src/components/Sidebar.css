@@ -1,3 +1,6 @@
+/* ══════════════════════════════════════════
+   SIDEBAR — Channel list
+══════════════════════════════════════════ */
 .sidebar {
   width: var(--sidebar-width);
   background: var(--bg-secondary);
@@ -8,6 +11,7 @@
   overflow: hidden;
 }
 
+/* ── Header ── */
 .sidebar-header {
   padding: 0 12px 0 16px;
   height: 54px;
@@ -17,6 +21,7 @@
   border-bottom: 1px solid var(--border-subtle);
   flex-shrink: 0;
   background: var(--bg-secondary);
+  box-shadow: 0 1px 0 var(--border-subtle);
 }
 
 .sidebar-title {
@@ -32,6 +37,7 @@
   background-clip: text;
 }
 
+/* ── Invite code strip ── */
 .invite-code {
   display: flex;
   align-items: center;
@@ -41,18 +47,20 @@
   color: var(--text-muted);
   background: var(--bg-tertiary);
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.2s ease, color 0.2s ease;
   border-bottom: 1px solid var(--border-subtle);
 }
 .invite-code:hover { background: var(--bg-hover); color: var(--text-secondary); }
 .invite-code code { color: var(--accent); font-family: monospace; font-size: 11px; }
 
+/* ── Channel list ── */
 .channels-list {
   flex: 1;
   overflow-y: auto;
-  padding: 8px 8px;
+  padding: 8px;
 }
 
+/* ── Category header ── */
 .channel-category {
   display: flex;
   align-items: center;
@@ -64,24 +72,28 @@
   letter-spacing: 1.2px;
   color: var(--text-muted);
   margin-bottom: 2px;
-  margin-top: 10px;
+  margin-top: 12px;
+  transition: color 0.2s ease;
 }
+.channel-category:hover { color: var(--text-secondary); }
 
+/* ── Channel item ── */
 .channel-item {
   display: flex;
   align-items: center;
   gap: 8px;
   width: 100%;
-  padding: 7px 10px;
+  padding: 7px 10px 7px 12px;
   border-radius: var(--radius-sm);
   color: var(--text-secondary);
   font-size: 13px;
   font-weight: 500;
   text-align: left;
   background: none;
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
   margin-bottom: 1px;
   position: relative;
+  overflow: hidden;
 }
 
 .channel-item:hover {
@@ -90,6 +102,7 @@
   padding-left: 14px;
 }
 
+/* Active state with left border accent */
 .channel-item.active {
   background: var(--accent-soft);
   color: var(--text-primary);
@@ -104,17 +117,22 @@
   top: 50%;
   transform: translateY(-50%);
   width: 3px;
-  height: 18px;
+  height: 20px;
   background: var(--grad-main);
   border-radius: 0 4px 4px 0;
-  box-shadow: 0 0 8px var(--accent-glow);
+  box-shadow: 0 0 10px var(--accent-glow);
 }
 
-.channel-hash { flex-shrink: 0; opacity: 0.4; font-size: 15px; }
+.channel-hash {
+  flex-shrink: 0;
+  opacity: 0.4;
+  font-size: 15px;
+  transition: opacity 0.2s ease;
+}
 .channel-item.active .channel-hash,
-.channel-item:hover .channel-hash { opacity: 0.7; }
+.channel-item:hover .channel-hash { opacity: 0.75; }
 
-/* Icon buttons */
+/* ── Icon buttons ── */
 .icon-btn {
   background: none;
   color: var(--text-muted);
@@ -123,7 +141,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: color 0.15s, background 0.15s;
+  transition: color 0.2s ease, background 0.2s ease;
   flex-shrink: 0;
 }
 .icon-btn:hover { color: var(--text-primary); background: var(--bg-hover); }
@@ -136,16 +154,16 @@
   line-height: 1;
   padding: 2px 4px;
   border-radius: var(--radius-sm);
-  transition: color 0.15s, background 0.15s;
+  transition: color 0.2s ease, background 0.2s ease;
 }
 .icon-btn-sm:hover { color: var(--text-primary); background: var(--bg-hover); }
 
-/* User panel */
+/* ── User panel ── */
 .user-panel {
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 8px 8px;
+  padding: 8px;
   background: var(--bg-primary);
   border-top: 1px solid var(--border-subtle);
   flex-shrink: 0;
@@ -160,7 +178,7 @@
   padding: 5px 6px;
   border-radius: var(--radius-sm);
   text-align: left;
-  transition: background 0.15s;
+  transition: background 0.2s ease;
   min-width: 0;
 }
 .user-panel-info:hover { background: var(--bg-hover); }
@@ -191,7 +209,7 @@
   font-size: 15px;
   padding: 5px;
   border-radius: var(--radius-sm);
-  transition: color 0.15s, background 0.15s;
+  transition: color 0.2s ease, background 0.2s ease;
   flex-shrink: 0;
 }
 .settings-btn:hover { color: var(--text-primary); background: var(--bg-hover); }
@@ -202,12 +220,14 @@
   font-size: 15px;
   padding: 5px;
   border-radius: var(--radius-sm);
-  transition: color 0.15s, background 0.15s;
+  transition: color 0.2s ease, background 0.2s ease;
 }
 .logout-btn:hover { color: var(--danger); background: rgba(239,68,68,0.08); }
 
-/* Mobile */
+/* ── Mobile ── */
 @media (max-width: 900px) {
   .sidebar { width: 100%; height: 100%; }
-  .channel-item { padding: 9px 10px; font-size: 14px; }
+  .channel-item { padding: 10px 12px; font-size: 14px; }
+  .channel-item:hover,
+  .channel-item.active { padding-left: 16px; }
 }
