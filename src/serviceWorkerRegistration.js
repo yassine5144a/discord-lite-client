@@ -13,24 +13,32 @@ function urlBase64ToUint8Array(base64String) {
   return outputArray;
 }
 
-async function subscribeToPush(registration) {
+// Called after user logs in — subscribes to push and saves to server
+export async function subscribeToPush() {
   try {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+
+    const token = localStorage.getItem('dl_token');
+    if (!token) return;
+
     // Request notification permission
     const permission = await Notification.requestPermission();
     if (permission !== 'granted') return;
 
-    // Subscribe to push
-    const subscription = await registration.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-    });
+    const registration = await navigator.serviceWorker.ready;
+
+    // Check if already subscribed
+    let subscription = await registration.pushManager.getSubscription();
+    if (!subscription) {
+      subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+      });
+    }
 
     // Send subscription to server
-    const token = localStorage.getItem('token');
-    if (!token) return;
-
     const serverUrl = process.env.REACT_APP_SERVER_URL || '';
-    await fetch(`${serverUrl}/api/push/subscribe`, {
+    const res = await fetch(`${serverUrl}/api/push/subscribe`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -39,7 +47,9 @@ async function subscribeToPush(registration) {
       body: JSON.stringify({ subscription })
     });
 
-    console.log('✅ Push notifications subscribed');
+    if (res.ok) {
+      console.log('✅ Push notifications subscribed');
+    }
   } catch (err) {
     console.error('Push subscription failed:', err);
   }
@@ -54,24 +64,12 @@ export function register() {
         .then((registration) => {
           console.log('✅ Service Worker registered:', registration.scope);
 
-          // Subscribe to push after SW is active
-          if (registration.active) {
-            subscribeToPush(registration);
-          } else {
-            registration.addEventListener('updatefound', () => {
-              const worker = registration.installing;
-              if (!worker) return;
-              worker.onstatechange = () => {
-                if (worker.state === 'activated') {
-                  subscribeToPush(registration);
-                }
-              };
-            });
-            // Also try when SW becomes active
-            navigator.serviceWorker.ready.then(reg => subscribeToPush(reg));
+          // If user is already logged in, subscribe immediately
+          const token = localStorage.getItem('dl_token');
+          if (token) {
+            navigator.serviceWorker.ready.then(() => subscribeToPush());
           }
 
-          // Check for updates
           registration.onupdatefound = () => {
             const worker = registration.installing;
             if (!worker) return;

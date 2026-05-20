@@ -1,4 +1,4 @@
-const CACHE_NAME = 'discord-lite-v7';
+const CACHE_NAME = 'ducky-chat-v1';
 
 // Files to cache for offline use
 const STATIC_ASSETS = [

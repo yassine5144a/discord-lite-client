@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import api from '../api';
+import { subscribeToPush } from '../serviceWorkerRegistration';
 
 const AuthContext = createContext(null);
 
@@ -17,6 +18,8 @@ export function AuthProvider({ children }) {
     try {
       const { data } = await api.get('/api/auth/me');
       setUser(data);
+      // Subscribe to push if not already subscribed
+      setTimeout(() => subscribeToPush(), 2000);
     } catch {
       logout();
     } finally {
@@ -29,6 +32,8 @@ export function AuthProvider({ children }) {
     localStorage.setItem('dl_token', data.token);
     setToken(data.token);
     setUser(data.user);
+    // Subscribe to push notifications after login
+    setTimeout(() => subscribeToPush(), 1000);
     return data;
   };
 
@@ -37,6 +42,8 @@ export function AuthProvider({ children }) {
     localStorage.setItem('dl_token', data.token);
     setToken(data.token);
     setUser(data.user);
+    // Subscribe to push notifications after register
+    setTimeout(() => subscribeToPush(), 1000);
     return data;
   };
 
