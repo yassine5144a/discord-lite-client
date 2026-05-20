@@ -2,6 +2,29 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import api from '../api';
 import { subscribeToPush } from '../serviceWorkerRegistration';
 
+// Register FCM token from Android WebView bridge
+async function registerFCMToken() {
+  try {
+    if (!window.AndroidFCM) return;
+    const fcmToken = window.AndroidFCM.getFcmToken();
+    if (!fcmToken) return;
+    const dlToken = localStorage.getItem('dl_token');
+    if (!dlToken) return;
+    const serverUrl = process.env.REACT_APP_SERVER_URL || '';
+    await fetch(`${serverUrl}/api/fcm/token`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${dlToken}`
+      },
+      body: JSON.stringify({ token: fcmToken })
+    });
+    console.log('✅ FCM token registered');
+  } catch (err) {
+    console.error('FCM token registration failed:', err);
+  }
+}
+
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
@@ -19,7 +42,7 @@ export function AuthProvider({ children }) {
       const { data } = await api.get('/api/auth/me');
       setUser(data);
       // Subscribe to push if not already subscribed
-      setTimeout(() => subscribeToPush(), 2000);
+      setTimeout(() => { subscribeToPush(); registerFCMToken(); }, 2000);
     } catch {
       logout();
     } finally {
@@ -32,8 +55,7 @@ export function AuthProvider({ children }) {
     localStorage.setItem('dl_token', data.token);
     setToken(data.token);
     setUser(data.user);
-    // Subscribe to push notifications after login
-    setTimeout(() => subscribeToPush(), 1000);
+    setTimeout(() => { subscribeToPush(); registerFCMToken(); }, 1000);
     return data;
   };
 
@@ -42,8 +64,7 @@ export function AuthProvider({ children }) {
     localStorage.setItem('dl_token', data.token);
     setToken(data.token);
     setUser(data.user);
-    // Subscribe to push notifications after register
-    setTimeout(() => subscribeToPush(), 1000);
+    setTimeout(() => { subscribeToPush(); registerFCMToken(); }, 1000);
     return data;
   };
 

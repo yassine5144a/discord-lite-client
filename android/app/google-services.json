@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "95333046668",
+    "project_id": "ducky-chat-d5f78",
+    "storage_bucket": "ducky-chat-d5f78.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:95333046668:android:ca0a940679e24697c29ea9",
+        "android_client_info": {
+          "package_name": "com.discordlite.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDPg7Gr0O7vBdJiBwgFTJTY6nmefr9BOHM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

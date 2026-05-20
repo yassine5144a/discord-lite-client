@@ -80,6 +80,8 @@ public class MainActivity extends AppCompatActivity {
 
         // Single JS bridge for voice service control
         webView.addJavascriptInterface(new VoiceBridge(this), "AndroidVoice");
+        // FCM token bridge
+        webView.addJavascriptInterface(new FcmBridge(this), "AndroidFCM");
 
         webView.setWebViewClient(new WebViewClient() {
             @Override
