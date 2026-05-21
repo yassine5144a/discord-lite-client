@@ -198,7 +198,7 @@ export default function Auth() {
 
         {/* Flip Back — shown when on register side */}
         <div className="auth-page-flip auth-page-back">
-          <div className="auth-content" style={{ transform: 'rotateY(180deg)' }}>
+          <div className="auth-content">
             <span className="auth-flip-icon">🎉</span>
             <h1 style={{ color: 'white' }}>Welcome Back!</h1>
             <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.9em', lineHeight: 1.6, marginBottom: '1.5em' }}>
