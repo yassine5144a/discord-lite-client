@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLang } from '../context/LangContext';
 import './Auth.css';
@@ -17,8 +17,6 @@ const GoogleIcon = () => (
 
 export default function Auth() {
   const [mode, setMode] = useState('login');
-  const [flipped, setFlipped] = useState(false);
-  const [animClass, setAnimClass] = useState('');
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 700);
   const [loginForm, setLoginForm] = useState({ email: '', password: '' });
   const [registerForm, setRegisterForm] = useState({ username: '', email: '', password: '' });
@@ -29,62 +27,23 @@ export default function Auth() {
   const { login, register } = useAuth();
   const { t } = useLang();
   const navigate = useNavigate();
-  const location = useLocation();
 
-  // Handle window resize
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 700);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Handle Google OAuth callback token
+  // Handle Google OAuth errors
   useEffect(() => {
     const hash = window.location.hash;
-    
-    // Check for google_token in hash query params (fallback)
-    if (hash.includes('google_token=')) {
-      const tokenMatch = hash.match(/google_token=([^&]+)/);
-      if (tokenMatch) {
-        localStorage.setItem('dl_token', tokenMatch[1]);
-        window.location.replace('/#/');
-        return;
-      }
-    }
-
-    // Check for token in /auth/callback
-    if (hash.includes('/auth/callback')) {
-      const queryString = hash.split('?')[1];
-      if (queryString) {
-        const params = new URLSearchParams(queryString);
-        const token = params.get('token');
-        if (token) {
-          localStorage.setItem('dl_token', token);
-          window.location.replace('/#/');
-          return;
-        }
-      }
-    }
-
-    // Handle error
     if (hash.includes('error=')) {
-      const queryString = hash.split('?')[1];
-      if (queryString) {
-        const params = new URLSearchParams(queryString);
-        const error = params.get('error');
-        if (error) setLoginError('Google login failed. Please try again.');
-      }
+      setLoginError('Google login failed. Please try again.');
     }
   }, []);
 
   const handleGoogleLogin = () => {
     window.location.href = `${SERVER_URL}/api/auth/google`;
-  };
-
-  const flip = (toRegister) => {
-    if (isMobile) { setMode(toRegister ? 'register' : 'login'); return; }
-    if (toRegister && !flipped) { setAnimClass('active'); setFlipped(true); }
-    else if (!toRegister && flipped) { setAnimClass('close'); setFlipped(false); }
   };
 
   const handleLogin = async (e) => {
@@ -111,7 +70,48 @@ export default function Auth() {
     } finally { setRegisterLoading(false); }
   };
 
-  // ── Mobile layout ──────────────────────────────────────────────────────────
+  const loginForm_jsx = (
+    <form onSubmit={handleLogin} className="auth-form-mobile">
+      <input type="email" placeholder={t('email')} value={loginForm.email}
+        onChange={e => setLoginForm({ ...loginForm, email: e.target.value })}
+        required autoComplete="email" />
+      <input type="password" placeholder={t('password')} value={loginForm.password}
+        onChange={e => setLoginForm({ ...loginForm, password: e.target.value })}
+        required minLength={6} autoComplete="current-password" />
+      {loginError && <div className="auth-error">{loginError}</div>}
+      <button type="submit" className="auth-btn-primary" disabled={loginLoading}>
+        {loginLoading ? <span className="auth-spinner" /> : t('login')}
+      </button>
+      <div className="auth-divider"><span>OR</span></div>
+      <button type="button" className="auth-btn-google" onClick={handleGoogleLogin}>
+        <GoogleIcon /> Continue with Google
+      </button>
+    </form>
+  );
+
+  const registerForm_jsx = (
+    <form onSubmit={handleRegister} className="auth-form-mobile">
+      <input type="text" placeholder={t('username')} value={registerForm.username}
+        onChange={e => setRegisterForm({ ...registerForm, username: e.target.value })}
+        required minLength={3} maxLength={32} autoComplete="username" />
+      <input type="email" placeholder={t('email')} value={registerForm.email}
+        onChange={e => setRegisterForm({ ...registerForm, email: e.target.value })}
+        required autoComplete="email" />
+      <input type="password" placeholder={t('password')} value={registerForm.password}
+        onChange={e => setRegisterForm({ ...registerForm, password: e.target.value })}
+        required minLength={6} autoComplete="new-password" />
+      {registerError && <div className="auth-error">{registerError}</div>}
+      <button type="submit" className="auth-btn-primary" disabled={registerLoading}>
+        {registerLoading ? <span className="auth-spinner" /> : t('register')}
+      </button>
+      <div className="auth-divider"><span>OR</span></div>
+      <button type="button" className="auth-btn-google" onClick={handleGoogleLogin}>
+        <GoogleIcon /> Continue with Google
+      </button>
+    </form>
+  );
+
+  // ── Mobile ────────────────────────────────────────────────────────────────
   if (isMobile) {
     return (
       <div className="auth-page">
@@ -120,116 +120,46 @@ export default function Auth() {
             <div className="auth-logo-icon">🐥</div>
             <span>Ducky Chat</span>
           </div>
-
           <div className="auth-tabs">
             <button className={`auth-tab ${mode === 'login' ? 'active' : ''}`} onClick={() => setMode('login')}>{t('login')}</button>
             <button className={`auth-tab ${mode === 'register' ? 'active' : ''}`} onClick={() => setMode('register')}>{t('register')}</button>
           </div>
-
-          {mode === 'login' ? (
-            <form onSubmit={handleLogin} className="auth-form-mobile">
-              <input type="email" placeholder={t('email')} value={loginForm.email} onChange={e => setLoginForm({ ...loginForm, email: e.target.value })} required autoComplete="email" />
-              <input type="password" placeholder={t('password')} value={loginForm.password} onChange={e => setLoginForm({ ...loginForm, password: e.target.value })} required minLength={6} autoComplete="current-password" />
-              {loginError && <div className="auth-error">{loginError}</div>}
-              <button type="submit" className="auth-btn-primary" disabled={loginLoading}>
-                {loginLoading ? <span className="auth-spinner" /> : t('login')}
-              </button>
-            </form>
-          ) : (
-            <form onSubmit={handleRegister} className="auth-form-mobile">
-              <input type="text" placeholder={t('username')} value={registerForm.username} onChange={e => setRegisterForm({ ...registerForm, username: e.target.value })} required minLength={3} maxLength={32} autoComplete="username" />
-              <input type="email" placeholder={t('email')} value={registerForm.email} onChange={e => setRegisterForm({ ...registerForm, email: e.target.value })} required autoComplete="email" />
-              <input type="password" placeholder={t('password')} value={registerForm.password} onChange={e => setRegisterForm({ ...registerForm, password: e.target.value })} required minLength={6} autoComplete="new-password" />
-              {registerError && <div className="auth-error">{registerError}</div>}
-              <button type="submit" className="auth-btn-primary" disabled={registerLoading}>
-                {registerLoading ? <span className="auth-spinner" /> : t('register')}
-              </button>
-            </form>
-          )}
-
-          <div className="auth-divider"><span>OR</span></div>
-          <button className="auth-btn-google" onClick={handleGoogleLogin}>
-            <GoogleIcon /> Continue with Google
-          </button>
+          {mode === 'login' ? loginForm_jsx : registerForm_jsx}
         </div>
       </div>
     );
   }
 
-  // ── Desktop layout (3D flip) ───────────────────────────────────────────────
+  // ── Desktop — simple slide (no 3D flip) ───────────────────────────────────
   return (
     <div className="auth-page">
-      <div className={`auth-container ${animClass}`}>
+      <div className="auth-desktop">
 
-        {/* Login Panel */}
-        <div className="auth-login-panel">
-          <div className="auth-content">
-            <div className="auth-logo-wrap">
-              <div className="auth-logo-icon">🐥</div>
-              <span>Ducky Chat</span>
-            </div>
-            <h1>{t('login')}</h1>
-            <form onSubmit={handleLogin}>
-              <input type="email" placeholder={t('email')} value={loginForm.email} onChange={e => setLoginForm({ ...loginForm, email: e.target.value })} required autoComplete="email" />
-              <input type="password" placeholder={t('password')} value={loginForm.password} onChange={e => setLoginForm({ ...loginForm, password: e.target.value })} required minLength={6} autoComplete="current-password" />
-              {loginError && <div className="auth-error">{loginError}</div>}
-              <button type="submit" className="auth-btn-primary" disabled={loginLoading}>
-                {loginLoading ? <span className="auth-spinner" /> : t('login')}
-              </button>
-            </form>
-            <div className="auth-divider"><span>OR</span></div>
-            <button className="auth-btn-google" onClick={handleGoogleLogin}>
-              <GoogleIcon /> Continue with Google
-            </button>
+        {/* Left panel — form */}
+        <div className="auth-form-panel">
+          <div className="auth-logo-wrap">
+            <div className="auth-logo-icon">🐥</div>
+            <span>Ducky Chat</span>
+          </div>
+
+          <div className="auth-tabs" style={{ marginBottom: 24 }}>
+            <button className={`auth-tab ${mode === 'login' ? 'active' : ''}`} onClick={() => setMode('login')}>{t('login')}</button>
+            <button className={`auth-tab ${mode === 'register' ? 'active' : ''}`} onClick={() => setMode('register')}>{t('register')}</button>
+          </div>
+
+          <div key={mode} className="auth-form-slide">
+            {mode === 'login' ? loginForm_jsx : registerForm_jsx}
           </div>
         </div>
 
-        {/* Flip Front — shown when on login side */}
-        <div className="auth-page-flip auth-page-front">
-          <div className="auth-content" style={{ transform: 'none' }}>
-            <span className="auth-flip-icon">👋</span>
-            <h1 style={{ color: 'white' }}>Hello, Friend!</h1>
-            <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.9em', lineHeight: 1.6, marginBottom: '1.5em' }}>
-              Enter your details and start your journey with us
-            </p>
-            <button className="auth-btn-outline" onClick={() => flip(true)}>{t('register')} →</button>
-          </div>
-        </div>
-
-        {/* Flip Back — shown when on register side */}
-        <div className="auth-page-flip auth-page-back">
-          <div className="auth-content">
-            <span className="auth-flip-icon">🎉</span>
-            <h1 style={{ color: 'white' }}>Welcome Back!</h1>
-            <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.9em', lineHeight: 1.6, marginBottom: '1.5em' }}>
-              To stay connected, please login with your personal info
-            </p>
-            <button className="auth-btn-outline" onClick={() => flip(false)}>← {t('login')}</button>
-          </div>
-        </div>
-
-        {/* Register Panel */}
-        <div className="auth-register-panel">
-          <div className="auth-content">
-            <div className="auth-logo-wrap">
-              <div className="auth-logo-icon">🐥</div>
-              <span>Ducky Chat</span>
-            </div>
-            <h1>{t('register')}</h1>
-            <form onSubmit={handleRegister}>
-              <input type="text" placeholder={t('username')} value={registerForm.username} onChange={e => setRegisterForm({ ...registerForm, username: e.target.value })} required minLength={3} maxLength={32} autoComplete="username" />
-              <input type="email" placeholder={t('email')} value={registerForm.email} onChange={e => setRegisterForm({ ...registerForm, email: e.target.value })} required autoComplete="email" />
-              <input type="password" placeholder={t('password')} value={registerForm.password} onChange={e => setRegisterForm({ ...registerForm, password: e.target.value })} required minLength={6} autoComplete="new-password" />
-              {registerError && <div className="auth-error">{registerError}</div>}
-              <button type="submit" className="auth-btn-primary" disabled={registerLoading}>
-                {registerLoading ? <span className="auth-spinner" /> : t('register')}
-              </button>
-            </form>
-            <div className="auth-divider"><span>OR</span></div>
-            <button className="auth-btn-google" onClick={handleGoogleLogin}>
-              <GoogleIcon /> Continue with Google
-            </button>
-          </div>
+        {/* Right panel — decorative */}
+        <div className={`auth-deco-panel ${mode === 'register' ? 'deco-warm' : 'deco-main'}`}>
+          <span className="auth-flip-icon">{mode === 'login' ? '👋' : '🎉'}</span>
+          <h2>{mode === 'login' ? 'Hello, Friend!' : 'Welcome Back!'}</h2>
+          <p>{mode === 'login'
+            ? 'Enter your details and start your journey with us'
+            : 'To stay connected, please login with your personal info'
+          }</p>
         </div>
 
       </div>
