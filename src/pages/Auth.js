@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useLang } from '../context/LangContext';
 import './Auth.css';
 
-const SERVER_URL = process.env.REACT_APP_SERVER_URL || 'https://web-production-cafaa.up.railway.app';
+const SERVER_URL = process.env.REACT_APP_SERVER_URL || 'https://ducky-chat.onrender.com';
 
 const GoogleIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24">
@@ -117,8 +117,8 @@ export default function Auth() {
       <div className="auth-page">
         <div className="auth-mobile-card">
           <div className="auth-logo-wrap">
-            <div className="auth-logo-icon">⚡</div>
-            <span>Discord Lite</span>
+            <div className="auth-logo-icon">🐥</div>
+            <span>Ducky Chat</span>
           </div>
 
           <div className="auth-tabs">
@@ -165,8 +165,8 @@ export default function Auth() {
         <div className="auth-login-panel">
           <div className="auth-content">
             <div className="auth-logo-wrap">
-              <div className="auth-logo-icon">⚡</div>
-              <span>Discord Lite</span>
+              <div className="auth-logo-icon">🐥</div>
+              <span>Ducky Chat</span>
             </div>
             <h1>{t('login')}</h1>
             <form onSubmit={handleLogin}>
@@ -184,22 +184,26 @@ export default function Auth() {
           </div>
         </div>
 
-        {/* Flip Front */}
+        {/* Flip Front — shown when on login side */}
         <div className="auth-page-flip auth-page-front">
-          <div className="auth-flip-content auth-content">
+          <div className="auth-content" style={{ transform: 'none' }}>
             <span className="auth-flip-icon">👋</span>
-            <h1>Hello, Friend!</h1>
-            <p>Enter your details and start your journey with us</p>
+            <h1 style={{ color: 'white' }}>Hello, Friend!</h1>
+            <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.9em', lineHeight: 1.6, marginBottom: '1.5em' }}>
+              Enter your details and start your journey with us
+            </p>
             <button className="auth-btn-outline" onClick={() => flip(true)}>{t('register')} →</button>
           </div>
         </div>
 
-        {/* Flip Back */}
+        {/* Flip Back — shown when on register side */}
         <div className="auth-page-flip auth-page-back">
-          <div className="auth-flip-content auth-content">
+          <div className="auth-content" style={{ transform: 'rotateY(180deg)' }}>
             <span className="auth-flip-icon">🎉</span>
-            <h1>Welcome Back!</h1>
-            <p>To stay connected, please login with your personal info</p>
+            <h1 style={{ color: 'white' }}>Welcome Back!</h1>
+            <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.9em', lineHeight: 1.6, marginBottom: '1.5em' }}>
+              To stay connected, please login with your personal info
+            </p>
             <button className="auth-btn-outline" onClick={() => flip(false)}>← {t('login')}</button>
           </div>
         </div>
@@ -208,8 +212,8 @@ export default function Auth() {
         <div className="auth-register-panel">
           <div className="auth-content">
             <div className="auth-logo-wrap">
-              <div className="auth-logo-icon">⚡</div>
-              <span>Discord Lite</span>
+              <div className="auth-logo-icon">🐥</div>
+              <span>Ducky Chat</span>
             </div>
             <h1>{t('register')}</h1>
             <form onSubmit={handleRegister}>

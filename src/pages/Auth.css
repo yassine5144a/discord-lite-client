@@ -107,6 +107,7 @@
   color: #fff;
   border-radius: 0 var(--radius-xl) var(--radius-xl) 0;
   transform-origin: left center;
+  backface-visibility: hidden;
 }
 
 .auth-page-front {
@@ -117,9 +118,8 @@
 .auth-page-back {
   background: var(--grad-warm);
   z-index: 2;
+  transform: rotateY(180deg);
 }
-
-.auth-page-back .auth-flip-content { transform: rotateY(180deg); }
 
 /* Flip animations */
 .auth-container.active .auth-page-front  { animation: rot-front 0.6s ease-in-out forwards; }
@@ -128,9 +128,9 @@
 .auth-container.close  .auth-page-back   { animation: close-rot-back  0.6s ease-in-out forwards; }
 
 @keyframes rot-front       { from { transform: translateZ(2px) rotateY(0deg);    } to { transform: translateZ(1px) rotateY(-180deg); } }
-@keyframes rot-back        { from { transform: translateZ(1px) rotateY(0deg);    } to { transform: translateZ(2px) rotateY(-180deg); } }
+@keyframes rot-back        { from { transform: translateZ(1px) rotateY(180deg);   } to { transform: translateZ(2px) rotateY(0deg);    } }
 @keyframes close-rot-front { from { transform: translateZ(1px) rotateY(-180deg); } to { transform: translateZ(2px) rotateY(0deg);    } }
-@keyframes close-rot-back  { from { transform: translateZ(2px) rotateY(-180deg); } to { transform: translateZ(1px) rotateY(0deg);    } }
+@keyframes close-rot-back  { from { transform: translateZ(2px) rotateY(0deg);    } to { transform: translateZ(1px) rotateY(180deg);  } }
 
 .auth-container.active .auth-register-panel .auth-content { animation: showContent 0.7s ease-in-out forwards; }
 .auth-container.close  .auth-register-panel .auth-content { animation: hideContent 0.7s ease-in-out forwards; }
