@@ -3,26 +3,26 @@
 ══════════════════════════════════════════ */
 .members-list {
   width: 220px;
-  background: rgba(7,11,20,0.50);
+  background: rgba(8, 8, 14, 0.6);
   backdrop-filter: blur(28px) saturate(180%);
   -webkit-backdrop-filter: blur(28px) saturate(180%);
-  border-left: 1px solid rgba(139,92,246,0.12);
+  border-left: 1px solid var(--border);
   overflow-y: auto;
   flex-shrink: 0;
   position: relative;
 }
 
 .members-header {
-  padding: 16px 14px 10px;
+  padding: 14px 14px 8px;
   font-size: 10px;
-  font-weight: 800;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 1.2px;
-  color: var(--text-muted);
-  border-bottom: 1px solid rgba(139,92,246,0.1);
+  letter-spacing: 0.9px;
+  color: var(--text-tertiary);
+  border-bottom: 1px solid var(--border);
   position: sticky;
   top: 0;
-  background: rgba(7,11,20,0.6);
+  background: rgba(8,8,14,0.75);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   z-index: 1;
