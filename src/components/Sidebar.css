@@ -269,6 +269,16 @@
 
 /* Mobile */
 @media (max-width: 900px) {
-  .sidebar { width: 100%; height: 100%; }
-  .channel-item { padding: 9px 10px; font-size: 14px; }
+  .sidebar {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: rgba(8,8,14,0.92);
+  }
+  .sidebar-header { display: none; } /* replaced by mobile-panel-header */
+  .channel-item { padding: 11px 12px; font-size: 14px; }
+  .channel-item:hover, .channel-item.active { padding-left: 14px; }
+  .channels-list { padding: 8px; }
+  .user-panel { padding: 8px 10px; }
+  .user-name { font-size: 14px; }
 }
