@@ -149,8 +149,8 @@
 .user-panel {
   display: flex;
   align-items: center;
-  gap: 3px;
-  padding: 6px;
+  gap: 0;
+  padding: 6px 8px;
   background: rgba(6, 6, 12, 0.6);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -162,7 +162,7 @@
   flex: 1;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
   background: none;
   padding: 5px 6px;
   border-radius: var(--radius-sm);
@@ -191,6 +191,55 @@
   font-size: 11px;
   color: var(--text-secondary);
   text-transform: capitalize;
+}
+
+/* Action icons right side */
+.user-panel-actions {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  flex-shrink: 0;
+}
+
+.panel-icon-btn {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+.panel-icon-btn:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+.panel-icon-btn:last-child:hover {
+  color: var(--danger);
+  background: rgba(248,113,113,0.08);
+}
+
+/* Channel icon */
+.channel-icon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  opacity: 0.35;
+  color: currentColor;
+  transition: opacity 0.15s;
+}
+.channel-item.active .channel-icon,
+.channel-item:hover .channel-icon { opacity: 0.65; }
+
+.channel-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .settings-btn,
